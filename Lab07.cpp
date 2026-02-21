@@ -6,12 +6,16 @@
  * 3. Assignment Description:
  *      Simulate satellites orbiting the earth
  * 4. What was the hardest part? Be as specific as possible.
- *      ??
+ *      I decided to be pedantic and go with Earth's gravitational constant, which led to a lot of math, so implementing that was tricky.
+ *      Getting the stars to twinkle independently was tricky too, but I'm pretty pround of my solution.
  * 5. How long did it take for you to complete the assignment?
- *      ??
+ *      12 hours between the two of us.
  *****************************************************************/
 
 #include <cassert>      // for ASSERT
+#include <cmath>        // for sqrt()
+#include <vector>
+
 #include "uiInteract.h" // for INTERFACE
 #include "uiDraw.h"     // for RANDOM and DRAW*
 #include "position.h"      // for POINT
@@ -38,9 +42,20 @@ public:
    Satellite satellite;
 
    Demo(Position ptUpperRight)
-       : ptUpperRight(ptUpperRight),
-         satellite(Position(0.0, 42164000.0), Velocity(-3100.0, 0.0))
+       : ptUpperRight(ptUpperRight)
    {
+      // Initializes a satellite in a circular orbit at GEO.
+      // Distance is from Earth's center in meters.
+      // I did some research and found that -3100 isn't super accurate for orbit,
+      // so I used the gravitational constant instead (EARTH_MU) divided by the distance from the Earth (Newton's law)
+      // Speed is in meters per second.
+      constexpr double GEO_RADIUS_METERS = 42164000.0;      // ~42,164 km
+      constexpr double EARTH_MU = 3.986004418e14;           // m^3 / s^2
+      const double geoSpeed = std::sqrt(EARTH_MU / GEO_RADIUS_METERS);
+
+      satellite.position.setMeters(0.0, GEO_RADIUS_METERS);
+      satellite.velocity = Velocity(-geoSpeed, 0.0);
+
       ptHubble.setPixelsX(ptUpperRight.getPixelsX() * random(-0.5, 0.5));
       ptHubble.setPixelsY(ptUpperRight.getPixelsY() * random(-0.5, 0.5));
 
@@ -59,12 +74,30 @@ public:
       ptGPS.setPixelsX(ptUpperRight.getPixelsX() * random(-0.5, 0.5));
       ptGPS.setPixelsY(ptUpperRight.getPixelsY() * random(-0.5, 0.5));
 
-      ptStar.setPixelsX(ptUpperRight.getPixelsX() * random(-0.5, 0.5));
-      ptStar.setPixelsY(ptUpperRight.getPixelsY() * random(-0.5, 0.5));
+      // Generate stars
+      const int NUM_STARS = 200;
+
+      for (int i = 0; i < NUM_STARS; i++)
+      {
+         Star star;
+
+         star.position.setPixelsX(ptUpperRight.getPixelsX() *
+                                  random(-0.5, 0.5));
+         star.position.setPixelsY(ptUpperRight.getPixelsY() *
+                                  random(-0.5, 0.5));
+
+         // Random starting phase
+         star.phase = static_cast<unsigned char>(random(0, 255));
+
+         // Random twinkle speed
+         // I tried a couple different ranges, 1-4 did best, I think it looks beautiful at this speed!
+         star.speed = static_cast<unsigned char>(random(1, 4));
+
+         stars.push_back(star);
+      }
 
       angleShip = 0.0;
       angleEarth = 0.0;
-      phaseStar = 0;
    }
 
    Position ptHubble;
@@ -76,11 +109,18 @@ public:
    Position ptStar;
    Position ptUpperRight;
 
-   unsigned char phaseStar;
-
    double angleShip;
    double angleEarth;
-
+   struct Star
+   {
+      Position position;
+      unsigned char phase; // char allows 0–255, giving 255 phases the star could be in.
+      unsigned char speed; // likewise, the twinkle speed can be any of 255 values, allowing for a lot of variation.
+      // I'm not using all of them at the moment though.
+      // char is also just a small data type that won't take up much space, which is good,
+      // because there will be a lot of stars, and they're already slowing down the simulation a little.
+   };
+   vector<Star> stars;
 };
 
 /*************************************
@@ -115,10 +155,26 @@ void callBack(const Interface* pUI, void* p)
    // perform all the game logic
    //
 
-   // rotate the earth
-   pDemo->angleEarth += 0.01;
+   // Rotate Earth at (approximately) the sidereal-day rate so a GEO satellite
+   // remains over the same point on the Earth's surface.
+   constexpr double TWO_PI = 6.28318530717958647692;
+   constexpr double SIDEREAL_DAY_SECONDS = 86164.0905;
+   const double earthRotationRate = TWO_PI / SIDEREAL_DAY_SECONDS; // rad/sec
+
+   // NOTE: The rotate() helper in uiDraw.cpp applies a clockwise rotation for a
+   // positive angle, so we subtract here to make Earth rotate the expected way.
+   pDemo->angleEarth -= earthRotationRate * SIM_SECONDS_PER_FRAME;
+
+   // Keep the angle bounded to avoid numeric blow-up over long runs.
+   pDemo->angleEarth = std::fmod(pDemo->angleEarth, TWO_PI);
+   if (pDemo->angleEarth < 0.0)
+      pDemo->angleEarth += TWO_PI;
+
    pDemo->angleShip += 0.02;
-   pDemo->phaseStar++;
+   for (auto& star : pDemo->stars)
+   {
+      star.phase += star.speed; // unsigned char auto-wraps at 255
+   }
    pDemo->satellite.update(SIM_SECONDS_PER_FRAME);
    //
    // draw everything
@@ -128,38 +184,41 @@ void callBack(const Interface* pUI, void* p)
    ogstream gout(pt);
 
    // draw satellites
-   gout.drawCrewDragon(pDemo->ptCrewDragon, pDemo->angleShip);
-   gout.drawHubble    (pDemo->ptHubble,     pDemo->angleShip);
-   gout.drawSputnik   (pDemo->ptSputnik,    pDemo->angleShip);
-   gout.drawStarlink  (pDemo->ptStarlink,   pDemo->angleShip);
-   gout.drawShip      (pDemo->ptShip,       pDemo->angleShip, pUI->isSpace());
-   gout.drawGPS       (pDemo->ptGPS,        pDemo->angleShip);
+   //gout.drawCrewDragon(pDemo->ptCrewDragon, pDemo->angleShip);
+   //gout.drawHubble    (pDemo->ptHubble,     pDemo->angleShip);
+   //gout.drawSputnik   (pDemo->ptSputnik,    pDemo->angleShip);
+   //gout.drawStarlink  (pDemo->ptStarlink,   pDemo->angleShip);
+   //gout.drawShip      (pDemo->ptShip,       pDemo->angleShip, pUI->isSpace());
+   //gout.drawGPS       (pDemo->ptGPS,        pDemo->angleShip);
    gout.drawSputnik   (pDemo->satellite.position, 0.0);
 
    // draw parts
-   pt.setPixelsX(pDemo->ptCrewDragon.getPixelsX() + 20);
-   pt.setPixelsY(pDemo->ptCrewDragon.getPixelsY() + 20);
-   gout.drawCrewDragonRight(pt, pDemo->angleShip); // notice only two parameters are set
-   pt.setPixelsX(pDemo->ptHubble.getPixelsX() + 20);
-   pt.setPixelsY(pDemo->ptHubble.getPixelsY() + 20);
-   gout.drawHubbleLeft(pt, pDemo->angleShip);      // notice only two parameters are set
-   pt.setPixelsX(pDemo->ptGPS.getPixelsX() + 20);
-   pt.setPixelsY(pDemo->ptGPS.getPixelsY() + 20);
-   gout.drawGPSCenter(pt, pDemo->angleShip);       // notice only two parameters are set
-   pt.setPixelsX(pDemo->ptStarlink.getPixelsX() + 20);
-   pt.setPixelsY(pDemo->ptStarlink.getPixelsY() + 20);
-   gout.drawStarlinkArray(pt, pDemo->angleShip);   // notice only two parameters are set
+   //pt.setPixelsX(pDemo->ptCrewDragon.getPixelsX() + 20);
+   //pt.setPixelsY(pDemo->ptCrewDragon.getPixelsY() + 20);
+   //gout.drawCrewDragonRight(pt, pDemo->angleShip); // notice only two parameters are set
+   //pt.setPixelsX(pDemo->ptHubble.getPixelsX() + 20);
+   //pt.setPixelsY(pDemo->ptHubble.getPixelsY() + 20);
+   //gout.drawHubbleLeft(pt, pDemo->angleShip);      // notice only two parameters are set
+   //pt.setPixelsX(pDemo->ptGPS.getPixelsX() + 20);
+   //pt.setPixelsY(pDemo->ptGPS.getPixelsY() + 20);
+   //gout.drawGPSCenter(pt, pDemo->angleShip);       // notice only two parameters are set
+   //pt.setPixelsX(pDemo->ptStarlink.getPixelsX() + 20);
+   //pt.setPixelsY(pDemo->ptStarlink.getPixelsY() + 20);
+   //gout.drawStarlinkArray(pt, pDemo->angleShip);   // notice only two parameters are set
 
-   // draw fragments
-   pt.setPixelsX(pDemo->ptSputnik.getPixelsX() + 20);
-   pt.setPixelsY(pDemo->ptSputnik.getPixelsY() + 20);
-   gout.drawFragment(pt, pDemo->angleShip);
-   pt.setPixelsX(pDemo->ptShip.getPixelsX() + 20);
-   pt.setPixelsY(pDemo->ptShip.getPixelsY() + 20);
-   gout.drawFragment(pt, pDemo->angleShip);
+   //// draw fragments
+   //pt.setPixelsX(pDemo->ptSputnik.getPixelsX() + 20);
+   //pt.setPixelsY(pDemo->ptSputnik.getPixelsY() + 20);
+   //gout.drawFragment(pt, pDemo->angleShip);
+   //pt.setPixelsX(pDemo->ptShip.getPixelsX() + 20);
+   //pt.setPixelsY(pDemo->ptShip.getPixelsY() + 20);
+   //gout.drawFragment(pt, pDemo->angleShip);
 
    // draw a single star
-   gout.drawStar(pDemo->ptStar, pDemo->phaseStar);
+   for (const auto& star : pDemo->stars)
+   {
+      gout.drawStar(star.position, star.phase);
+   }
 
    // draw the earth
    pt.setMeters(0.0, 0.0);
