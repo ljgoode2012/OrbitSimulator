@@ -7,18 +7,17 @@
  *    Everything we need to know about a location on the screen.
  ************************************************************************/
 
-
+#include "satellite.h"
+#include "acceleration.h"
 #include "position.h"
 #include "velocity.h"
-#include "acceleration.h"
-#include "satellite.h"
 
 /******************************************
  * Satellite : Update
  * Update the satellite's position
  *****************************************/
 
- void Satellite::update(double dt)
+void Satellite::update(double dt)
 {
    // Update velocity: v = v0 + a * t
    velocity.dx += acceleration.ddx * dt;
