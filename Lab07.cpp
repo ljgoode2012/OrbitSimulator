@@ -16,7 +16,17 @@
 #include "uiDraw.h"     // for RANDOM and DRAW*
 #include "position.h"      // for POINT
 #include "test.h"
+#include "satellite.h"  // for Sattelite
+#include "velocity.h"   // for Velocity
 using namespace std;
+
+
+
+#define FRAMES_PER_SECOND 30.0
+// frames per 1 simulated day, 1 simulated day will be 60 seconds of run time
+#define FRAMES_PER_SIM_DAY (FRAMES_PER_SECOND * 60.0) //1800.0
+// dialated seconds per frame (there are 86400 seconds in a day)
+#define SIM_SECONDS_PER_FRAME (86400.0 / FRAMES_PER_SIM_DAY) // 48.0
 
 /*************************************************************************
  * Demo
@@ -25,8 +35,11 @@ using namespace std;
 class Demo
 {
 public:
-   Demo(Position ptUpperRight) :
-      ptUpperRight(ptUpperRight)
+   Satellite satellite;
+
+   Demo(Position ptUpperRight)
+       : ptUpperRight(ptUpperRight),
+         satellite(Position(0.0, 42164000.0), Velocity(-3100.0, 0.0))
    {
       ptHubble.setPixelsX(ptUpperRight.getPixelsX() * random(-0.5, 0.5));
       ptHubble.setPixelsY(ptUpperRight.getPixelsY() * random(-0.5, 0.5));
@@ -67,6 +80,7 @@ public:
 
    double angleShip;
    double angleEarth;
+
 };
 
 /*************************************
@@ -84,7 +98,7 @@ void callBack(const Interface* pUI, void* p)
 
    //
    // accept input
-   //
+   
 
    // move by a little
    if (pUI->isUp())
@@ -105,7 +119,7 @@ void callBack(const Interface* pUI, void* p)
    pDemo->angleEarth += 0.01;
    pDemo->angleShip += 0.02;
    pDemo->phaseStar++;
-
+   pDemo->satellite.update(SIM_SECONDS_PER_FRAME);
    //
    // draw everything
    //
@@ -120,6 +134,7 @@ void callBack(const Interface* pUI, void* p)
    gout.drawStarlink  (pDemo->ptStarlink,   pDemo->angleShip);
    gout.drawShip      (pDemo->ptShip,       pDemo->angleShip, pUI->isSpace());
    gout.drawGPS       (pDemo->ptGPS,        pDemo->angleShip);
+   gout.drawSputnik   (pDemo->satellite.position, 0.0);
 
    // draw parts
    pt.setPixelsX(pDemo->ptCrewDragon.getPixelsX() + 20);
