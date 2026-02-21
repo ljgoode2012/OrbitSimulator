@@ -1,0 +1,23 @@
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build results
+bin/
+obj/
+out/
+
+# NuGet packages
+*.nupkg
+packages/
+*.snk
+
+# Others
+*.log
+*.tlog
+*.cache
+*.pdb
+*.db
+*.DS_Store
