@@ -1,13 +1,13 @@
 /***********************************************************************
  * Source File:
- *    Point : The representation of a position on the screen
+ *    Entity : The representation of a physical object in space
  * Author:
  *    Lindsey Goode and Porter Williams
  * Summary:
- *    Everything we need to know about a location on the screen.
+ *    Everything we need to know about an entity's position and velocity.
  ************************************************************************/
 
-#include "satellite.h"
+#include "entity.h"
 
 #include <cmath>
 
@@ -16,17 +16,18 @@
 #include "velocity.h"
 
 /******************************************
- * Satellite : Update
- * Update the satellite's position
+ * Entity : Update
+ * Update the entity's position
  *****************************************/
 
-void Satellite::update(double dt)
+void Entity::update(double dt)
 {
-   // Acceleration due to gravity at the satellite's current position.
+   // Acceleration due to gravity at the entity's current position.
    const double x = position.getMetersX();
    const double y = position.getMetersY();
    const double r2 = x * x + y * y;
 
+   Acceleration acceleration;
    if (r2 > 0.0)
    {
       const double r = std::sqrt(r2);
