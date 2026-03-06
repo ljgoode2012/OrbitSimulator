@@ -108,7 +108,7 @@ public:
    struct Star
    {
       Position position;
-      unsigned char phase; // char allows 0–255, giving 255 phases the star could be in.
+      unsigned char phase; // char allows 0–255, giving 255 phases the star could be in
       unsigned char speed; // likewise, the twinkle speed can be any of 255 values, allowing for a lot of variation.
       // I'm not using all of them at the moment though.
       // char is also just a small data type that won't take up much space, which is good,
