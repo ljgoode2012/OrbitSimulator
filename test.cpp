@@ -9,6 +9,7 @@
 
 #include "test.h"
 #include "testPosition.h"
+#include "testVelocity.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -30,4 +31,5 @@ void testRunner()
 #endif // _WIN32
 
    TestPosition().run();
+   TestVelocity().run();
 }

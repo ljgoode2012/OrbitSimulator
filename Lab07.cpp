@@ -12,25 +12,19 @@
  *      12 hours between the two of us.
  *****************************************************************/
 
-#include <cassert>      // for ASSERT
-#include <cmath>        // for sqrt()
+#include <cassert>
+#include <cmath>
 #include <vector>
 
-#include "uiInteract.h" // for INTERFACE
-#include "uiDraw.h"     // for RANDOM and DRAW*
-#include "position.h"      // for POINT
+#include "constants.h"
+#include "uiInteract.h"
+#include "uiDraw.h"
+#include "position.h"
 #include "test.h"
-#include "satellite.h"  // for Sattelite
-#include "velocity.h"   // for Velocity
+#include "satellite.h"
+#include "velocity.h"
+
 using namespace std;
-
-
-
-#define FRAMES_PER_SECOND 30.0
-// frames per 1 simulated day, 1 simulated day will be 60 seconds of run time
-#define FRAMES_PER_SIM_DAY (FRAMES_PER_SECOND * 60.0) //1800.0
-// dialated seconds per frame (there are 86400 seconds in a day)
-#define SIM_SECONDS_PER_FRAME (86400.0 / FRAMES_PER_SIM_DAY) // 48.0
 
 /*************************************************************************
  * Demo

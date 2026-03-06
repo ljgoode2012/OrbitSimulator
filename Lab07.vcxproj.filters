@@ -33,6 +33,18 @@
     <ClCompile Include="satellite.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="angle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="entity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="acceleration.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="velocity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="test.h">
@@ -60,6 +72,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="satellite.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="angle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="entity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="constants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="testVelocity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
