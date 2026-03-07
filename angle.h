@@ -14,6 +14,8 @@
 #include <iostream>
 
 class TestVelocity;
+class TestAcceleration;
+class TestAngle;
 
 /*********************************************
  * Angle
@@ -24,6 +26,9 @@ class Angle
 {
 public:
    friend TestVelocity;
+   friend TestAcceleration;
+   friend TestAngle;
+
    // Constructors
    Angle() : radians(0.0) {}
    Angle(const Angle& rhs) : radians(rhs.radians) {}

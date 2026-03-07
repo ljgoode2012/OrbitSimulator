@@ -1,3 +1,11 @@
+/***********************************************************************
+ * Header File:
+ *    Test Velocity : Test the Velocity class
+ * Author:
+ *    Lindsey Goode and Porter Williams
+ * Summary:
+ *    All the unit tests for Velocity
+ ************************************************************************/
 
 #pragma once
 
