@@ -9,16 +9,23 @@
 
 #pragma once
 
+#include "angle.h"
+
+class TestAcceleration;
+
+
 /*********************************************
  * Acceleration
  * An acceleration is just two doubles representing
  * the change in velocity in the x and y directions
  *********************************************/
-class Angle;  // Forward declaration
+
 
 class Acceleration
 {
 public:
+   friend class TestAcceleration;
+
    // Constructors
    Acceleration() : ddx(0.0), ddy(0.0) {}
    Acceleration(double ddx, double ddy) : ddx(ddx), ddy(ddy) {}
