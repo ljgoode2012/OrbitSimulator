@@ -8,12 +8,23 @@
  ************************************************************************/
 
 #include "satellite.h"
-
 #include <cmath>
+/******************************************
+ * Satellite : Random Spin Rate
+ * Initialize the angular velocity to a random spin rate.
+ *****************************************/
+void Satellite::setRandomSpinRate()
+{
+   // Random spin speed in radians/second.
+   constexpr double MIN_SPIN_RATE = 0.001;
+   constexpr double MAX_SPIN_RATE = 0.010;
 
-#include "acceleration.h"
-#include "position.h"
-#include "velocity.h"
+   const double percent = static_cast<double>(std::rand()) / static_cast<double>(RAND_MAX);
+   const double spinRate = MIN_SPIN_RATE + percent * (MAX_SPIN_RATE - MIN_SPIN_RATE);
+   const double direction = (std::rand() % 2 == 0) ? 1.0 : -1.0;
+   setAngularVelocity(direction * spinRate);
+}
+
 
 /******************************************
  * Satellite : Update
@@ -22,30 +33,13 @@
 
 void Satellite::update(double dt)
 {
-   // Earth gravitational parameter (mu = G*M) in m^3/s^2
-   constexpr double MU = 3.986004418e14;
+   Entity::update(dt);
 
-   // Acceleration due to gravity at the satellite's current position.
-   const double x = position.getMetersX();
-   const double y = position.getMetersY();
-   const double r2 = x * x + y * y;
-
-   if (r2 > 0.0)
+   if (!isDefunct)
    {
-      const double r = std::sqrt(r2);
-      const double r3 = r2 * r;
-      acceleration.ddx = (-MU * x) / r3;
-      acceleration.ddy = (-MU * y) / r3;
+      // Keep healthy satellites pointed toward Earth.
+      const Position& position = getPosition();
+      const double angleToEarth = std::atan2(-position.getMetersY(), -position.getMetersX());
+      setRotation(-angleToEarth);
    }
-   else
-   {
-      acceleration.ddx = 0.0;
-      acceleration.ddy = 0.0;
-   }
-
-   velocity.dx += acceleration.ddx * dt;
-   velocity.dy += acceleration.ddy * dt;
-
-   position.setMetersX(position.getMetersX() + velocity.dx * dt);
-   position.setMetersY(position.getMetersY() + velocity.dy * dt);
 }

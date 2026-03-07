@@ -8,6 +8,7 @@
  ************************************************************************/
 
 #include "test.h"
+#include "testEntity.h"
 #include "testPosition.h"
 
 #ifdef _WIN32
@@ -30,4 +31,7 @@ void testRunner()
 #endif // _WIN32
 
    TestPosition().run();
+   TestEntity().run();
+   TestBreakableEntity().run();
+   TestTimedEntity().run();
 }

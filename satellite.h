@@ -1,26 +1,43 @@
 #pragma once
+#include <cstdlib>
 
-#include "acceleration.h"
-#include "position.h"
-#include "velocity.h"
+#include "breakableEntity.h"
 
-class Satellite
+class Satellite : public BreakableEntity
 {
+private:
+   bool isDefunct;
+   void setRandomSpinRate();
+
 public:
-   // Members
-   Position position;
-   Velocity velocity;
-   Acceleration acceleration;
-
    // Constructors
-   Satellite() : position(), velocity(), acceleration() {}
-
-   Satellite(const Position& pos, const Velocity& vel,
-             const Acceleration& acc = Acceleration())
-       : position(pos), velocity(vel), acceleration(acc)
+   Satellite() : BreakableEntity(), isDefunct(false)
    {
+      setIsDefunct((std::rand() % 5) == 0);
+   }
+   Satellite(const Position& pos, const Velocity& vel)
+       : BreakableEntity(pos, vel), isDefunct(false)
+   {
+      // Has a one in five chance of being defunct.
+      setIsDefunct((std::rand() % 5) == 0);
    }
 
    // Update the satellite's position and velocity using basic kinematics
-   void update(double dt);
+   void update(double dt) override;
+
+   // SET Methods
+   void setIsDefunct(bool isDefunct)
+   {
+      this->isDefunct = isDefunct;
+      if (this->isDefunct)
+         setRandomSpinRate();
+      else
+         setAngularVelocity(0.0);
+   }
+
+   // GET Methods
+   bool getIsDefunct() const
+   {
+      return isDefunct;
+   }
 };
