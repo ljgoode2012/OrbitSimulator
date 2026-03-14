@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include "constants.h"
 #include "acceleration.h"
 #include "angle.h"
 
@@ -52,7 +53,6 @@ protected:
 private:
    static Acceleration computeGravityAcceleration(const Position& position)
    {
-      constexpr double EARTH_GRAVITATIONAL_PARAMETER = 3.986004418e14;
 
       const double xMeters = position.getMetersX();
       const double yMeters = position.getMetersY();
@@ -63,9 +63,8 @@ private:
 
       const double radius = std::sqrt(radiusSquared);
       const double radiusCubed = radiusSquared * radius;
-
-      const double accelerationX = (-EARTH_GRAVITATIONAL_PARAMETER * xMeters) / radiusCubed;
-      const double accelerationY = (-EARTH_GRAVITATIONAL_PARAMETER * yMeters) / radiusCubed;
+      const double accelerationX = (-MU * xMeters) / radiusCubed;
+      const double accelerationY = (-MU * yMeters) / radiusCubed;
       return Acceleration(accelerationX, accelerationY);
    }
    Position position;

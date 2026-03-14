@@ -8,6 +8,7 @@
  ************************************************************************/
 
 #include "satellite.h"
+#include "constants.h"
 #include <cmath>
 /******************************************
  * Satellite : Random Spin Rate
@@ -34,9 +35,7 @@ void Satellite::initializeCircularOrbit(double orbitalRadiusMeters, double phase
    if (orbitalRadiusMeters <= 0.0)
       return;
 
-   constexpr double EARTH_MU = 3.986004418e14; // m^3 / s^2
-
-   const double speed = std::sqrt(EARTH_MU / orbitalRadiusMeters);
+   const double speed = std::sqrt(MU / orbitalRadiusMeters);
    const double x = orbitalRadiusMeters * std::cos(phaseRadians);
    const double y = orbitalRadiusMeters * std::sin(phaseRadians);
    const double vx = -speed * std::sin(phaseRadians);
@@ -57,12 +56,4 @@ void Satellite::initializeCircularOrbit(double orbitalRadiusMeters, double phase
 void Satellite::update(double dt)
 {
    Entity::update(dt);
-
-   if (!isDefunct)
-   {
-      // Keep healthy satellites pointed toward Earth.
-      const Position& position = getPosition();
-      const double angleToEarth = std::atan2(-position.getMetersY(), -position.getMetersX());
-      setRotation(-angleToEarth);
-   }
 }

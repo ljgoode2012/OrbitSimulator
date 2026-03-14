@@ -58,7 +58,7 @@ PointerAlignment: Left
 ReferenceAlignment: Left
 
 # Function formatting
-AllowShortFunctionsOnASingleLine: Empty
+AllowShortFunctionsOnASingleLine: Inline
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortLoopsOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: false

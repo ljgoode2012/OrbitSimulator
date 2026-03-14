@@ -85,3 +85,9 @@ cpp_wrap_preserve_blocks = one_liners
 
 [*.{vcxproj,vcxproj.filters,props,targets}]
 indent_size = 2
+
+[*.h]
+# Preserve inline formatting for trivial methods
+cpp_indent_braces = false
+cpp_indent_multi_line_relative_to = innermost_parenthesis
+cpp_space_around_binary_operators = remove
