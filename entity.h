@@ -1,56 +1,74 @@
-/***********************************************************************
- * Header File:
- *    Entity: The representation of a physical object in space
- * Author:
- *    Lindsey Goode, Porter Williams
- * Summary:
- *    Each entity has a position, velocity, and heading angle, and can update itself based on
- * time and acceleration due to gravity. This is the base class for all physical
- * objects in the simulation.
- ************************************************************************/
-
 #pragma once
+
+#include <cmath>
+#include "constants.h"
+#include "acceleration.h"
+#include "angle.h"
 
 #include "position.h"
 #include "velocity.h"
-#include "angle.h"
 
-/*********************************************
- * Entity
- * A single physical object in space with a position, velocity, and heading
- * angle
- *********************************************/
 class Entity
 {
 public:
-   // Members
-   Position position;
-   Velocity velocity;
-   Angle heading;
-   double radiusInPixels;
 
    // Constructors
-   Entity() : position(), velocity(), heading(), radiusInPixels(0.0) {}
-
-   Entity(const Position& pos, const Velocity& vel)
-       : position(pos), velocity(vel), heading(), radiusInPixels(0.0)
+   Entity() : position(), velocity(), rotation(0.0), angularVelocity(0.0) {}
+   Entity(const Position& pos, const Velocity& vel,
+          const Angle& rotation = Angle(),
+          double angularVelocity = 0.0)
+       : position(pos), velocity(vel),
+         rotation(rotation), angularVelocity(angularVelocity)
    {
    }
 
-   Entity(const Position& pos, const Velocity& vel, const Angle& head)
-       : position(pos), velocity(vel), heading(head), radiusInPixels(0.0)
-   {
-   }
-
-   Entity(const Position& pos, const Velocity& vel, const Angle& head, double radius)
-       : position(pos), velocity(vel), heading(head), radiusInPixels(radius)
-   {
-   }
-
-   // Destructor
    virtual ~Entity() = default;
 
-   // Update the entity's position and velocity using basic kinematics
-   void update(double dt);
-};
+   // getters
+   const Position& getPosition() const { return position; }
+   const Angle& getRotation() const { return rotation; }
+   double getAngularVelocity() const { return angularVelocity; }
 
+   // setters
+   void setPosition(const Position& position) { this->position = position; }
+   void setVelocity(const Velocity& velocity) { this->velocity = velocity; }
+   void setAngularVelocity(double angularVelocity) { this->angularVelocity = angularVelocity; }
+   // Update the entity's position and velocity using basic kinematics
+   virtual void update(double dt)
+   {
+      const Acceleration gravityAcceleration = computeGravityAcceleration(position);
+      velocity.update(gravityAcceleration, dt);
+      position.update(velocity, dt);
+      rotation.addRadians(angularVelocity * dt);
+   }
+
+protected:
+   Position& getPositionMutable() { return position; }
+   const Velocity& getVelocity() const { return velocity; }
+   void setRotation(const Angle& rotation)
+   {
+      this->rotation = rotation;
+   }
+
+private:
+   static Acceleration computeGravityAcceleration(const Position& position)
+   {
+
+      const double xMeters = position.getMetersX();
+      const double yMeters = position.getMetersY();
+      const double radiusSquared = xMeters * xMeters + yMeters * yMeters;
+
+      if (radiusSquared <= 0.0)
+         return Acceleration();
+
+      const double radius = std::sqrt(radiusSquared);
+      const double radiusCubed = radiusSquared * radius;
+      const double accelerationX = (-MU * xMeters) / radiusCubed;
+      const double accelerationY = (-MU * yMeters) / radiusCubed;
+      return Acceleration(accelerationX, accelerationY);
+   }
+   Position position;
+   Velocity velocity;
+   Angle rotation;
+   double angularVelocity;
+};

@@ -8,12 +8,45 @@
  ************************************************************************/
 
 #include "satellite.h"
-
+#include "constants.h"
 #include <cmath>
+/******************************************
+ * Satellite : Random Spin Rate
+ * Initialize the angular velocity to a random spin rate.
+ *****************************************/
+void Satellite::setRandomSpinRate()
+{
+   // Random spin speed in radians/second.
+   constexpr double MIN_SPIN_RATE = 0.001;
+   constexpr double MAX_SPIN_RATE = 0.010;
 
-#include "acceleration.h"
-#include "position.h"
-#include "velocity.h"
+   const double percent = static_cast<double>(std::rand()) / static_cast<double>(RAND_MAX);
+   const double spinRate = MIN_SPIN_RATE + percent * (MAX_SPIN_RATE - MIN_SPIN_RATE);
+   const double direction = (std::rand() % 2 == 0) ? 1.0 : -1.0;
+   setAngularVelocity(direction * spinRate);
+}
+
+/******************************************
+ * Satellite : Initialize Circular Orbit
+ * Set this satellite's initial position and velocity for a circular orbit.
+ *****************************************/
+void Satellite::initializeCircularOrbit(double orbitalRadiusMeters, double phaseRadians)
+{
+   if (orbitalRadiusMeters <= 0.0)
+      return;
+
+   const double speed = std::sqrt(MU / orbitalRadiusMeters);
+   const double x = orbitalRadiusMeters * std::cos(phaseRadians);
+   const double y = orbitalRadiusMeters * std::sin(phaseRadians);
+   const double vx = -speed * std::sin(phaseRadians);
+   const double vy = speed * std::cos(phaseRadians);
+
+   Position position;
+   position.setMeters(x, y);
+   setPosition(position);
+   setVelocity(Velocity(vx, vy));
+}
+
 
 /******************************************
  * Satellite : Update
@@ -22,27 +55,5 @@
 
 void Satellite::update(double dt)
 {
-   // Acceleration due to gravity at the satellite's current position.
-   const double x = position.getMetersX();
-   const double y = position.getMetersY();
-   const double r2 = x * x + y * y;
-
-   if (r2 > 0.0)
-   {
-      const double r = std::sqrt(r2);
-      const double r3 = r2 * r;
-      acceleration.setDDX((-MU * x) / r3);
-      acceleration.setDDY((-MU * y) / r3);
-   }
-   else
-   {
-      acceleration.setDDX(0.0);
-      acceleration.setDDY(0.0);
-   }
-
-   velocity.addDX(acceleration.getDDX() * dt);
-   velocity.addDY(acceleration.getDDY() * dt);
-
-   position.setMetersX(position.getMetersX() + velocity.getDX() * dt);
-   position.setMetersY(position.getMetersY() + velocity.getDY() * dt);
+   Entity::update(dt);
 }

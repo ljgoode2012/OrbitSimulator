@@ -1,66 +1,111 @@
-/***********************************************************************
- * Header File:
- *    Angle: The representation of an angle
- * Author:
- *    Lindsey Goode, Porter Williams
- * Summary:
- *    Everything we need to know about an angle, which is just a single double
- ************************************************************************/
-
 #pragma once
 
 #include "constants.h"
 #include <cmath>
-#include <iostream>
 
 class TestVelocity;
 class TestAcceleration;
 class TestAngle;
 
-/*********************************************
- * Angle
- * A single angle based on radians
- *********************************************/
-
 class Angle
 {
 public:
-   friend TestVelocity;
-   friend TestAcceleration;
-   friend TestAngle;
+   friend class TestVelocity;
+   friend class TestAcceleration;
+   friend class TestAngle;
 
-   // Constructors
-   Angle() : radians(0.0) {}
+   Angle(double radians = 0.0) : radians(0.0)
+   {
+      setRadians(radians);
+   }
    Angle(const Angle& rhs) : radians(rhs.radians) {}
-   Angle(double degrees) : radians(0.0) { setDegrees(degrees); }
 
-   // Getters
-   double getDegrees() const { return radians * 180.0 / M_PI; }
-   double getRadians() const { return radians; }
+   double getDegrees() const
+   {
+      return radians * 180.0 / M_PI;
+   }
 
-   double getDx() const { return sin(radians); }
-   double getDy() const { return cos(radians); }
+   double getRadians() const
+   {
+      return radians;
+   }
 
-   bool isRight() const { return radians < M_PI; }
-   bool isLeft() const { return radians > M_PI; }
+   double getDx() const
+   {
+      return std::sin(radians);
+   }
 
-   // Setters
-   void setDegrees(double degrees) { radians = normalize(convertToRadians(degrees)); }
-   void setRadians(double radians) { this->radians = normalize(radians); }
-   void setNaturalRadians(double radians);
+   double getDy() const
+   {
+      return std::cos(radians);
+   }
 
-   void setUp() { radians = 0.0; }
-   void setDown() { radians = M_PI; }
-   void setRight() { radians = M_PI * 0.5; }
-   void setLeft() { radians = M_PI * 1.5; }
+   bool isRight() const
+   {
+      return radians < M_PI;
+   }
 
-   void reverse() { radians = normalize(radians + M_PI); }
+   bool isLeft() const
+   {
+      return radians > M_PI;
+   }
 
-   void setDxDy(double dx, double dy) { radians = normalize(atan2(dx, dy)); }
+   void setRadians(double radians)
+   {
+      this->radians = normalize(radians);
+   }
 
-   Angle& add(double delta) { radians = normalize(radians + delta); return *this; }
+   void setDegrees(double degrees)
+   {
+      setRadians(degrees * M_PI / 180.0);
+   }
 
-   // Operators
+   void setNaturalRadians(double radians)
+   {
+      this->radians = radians;
+   }
+
+   void setUp()
+   {
+      radians = 0.0;
+   }
+
+   void setDown()
+   {
+      radians = M_PI;
+   }
+
+   void setRight()
+   {
+      radians = M_PI_2;
+   }
+
+   void setLeft()
+   {
+      radians = M_PI + M_PI_2;
+   }
+
+   void reverse()
+   {
+      setRadians(radians + M_PI);
+   }
+
+   void setDxDy(double dx, double dy)
+   {
+      setRadians(std::atan2(dx, dy));
+   }
+
+   Angle& add(double deltaRadians)
+   {
+      setRadians(radians + deltaRadians);
+      return *this;
+   }
+
+   void addRadians(double deltaRadians)
+   {
+      setRadians(radians + deltaRadians);
+   }
+
    Angle& operator=(const Angle& a)
    {
       if (this != &a)
@@ -69,31 +114,20 @@ public:
       }
       return *this;
    }
-   Angle operator+(const Angle& a) const { return Angle(radians + a.radians); }
-   Angle& operator+=(const Angle& a) { radians += a.radians; return *this; }
-   Angle operator-(const Angle& a) const { return Angle(radians - a.radians); }
-   Angle& operator-=(const Angle& a) { radians -= a.radians; return *this; }
-   bool operator==(const Angle& a) const { return radians == a.radians; }
-   bool operator!=(const Angle& a) const { return !(*this == a); }
+
+   operator double() const
+   {
+      return radians;
+   }
 
 private:
+   static double normalize(double radians)
+   {
+      radians = std::fmod(radians, M_PI * 2.0);
+      if (radians < 0.0)
+         radians += M_PI * 2.0;
+      return radians;
+   }
+
    double radians;
-
-   double normalize(double radians) const;
-
-   double convertToRadians(double degrees) const
-   {
-      return degrees / 360.0 * (M_PI * 2.0);
-   }
-
-   double convertToDegrees(double radians) const
-   {
-      return radians / (M_PI * 2.0) * 360.0;
-   }
 };
-
-inline std::ostream& operator<<(std::ostream& out, const Angle& rhs)
-{
-   out << rhs.getDegrees() << " degrees";
-   return out;
-}

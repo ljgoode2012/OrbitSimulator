@@ -1,39 +1,101 @@
-/***********************************************************************
- * Header File:
- *    Satellite: The representation of a satellite in space
- * Author:
- *    Lindsey Goode and Porter Williams
- * Summary:
- *    Everything we need to know about a satellite.
- ************************************************************************/
-
 #pragma once
+#include <cstdlib>
 
-#include "entity.h"
-#include "acceleration.h"
+#include "breakableEntity.h"
 
-/*********************************************
- * Satellite
- * A single satellite object in space
- *********************************************/
-class Satellite : public Entity
+class Satellite : public BreakableEntity
+{
+private:
+   bool isDefunct;
+   void setRandomSpinRate();
+protected:
+   void initializeCircularOrbit(double orbitalRadiusMeters, double phaseRadians = 0.0);
+
+public:
+   // Constructors
+   Satellite() : BreakableEntity(), isDefunct(false)
+   {
+      setIsDefunct((std::rand() % 5) == 0);
+   }
+   Satellite(const Position& pos, const Velocity& vel)
+       : BreakableEntity(pos, vel), isDefunct(false)
+   {
+      // Has a one in five chance of being defunct.
+      setIsDefunct((std::rand() % 5) == 0);
+   }
+
+   // Update the satellite's position and velocity using basic kinematics
+   void update(double dt) override;
+
+   // SET Methods
+   void setIsDefunct(bool isDefunct)
+   {
+      this->isDefunct = isDefunct;
+      if (this->isDefunct)
+         setRandomSpinRate();
+      else
+         setAngularVelocity(0.0);
+   }
+
+   // GET Methods
+   bool getIsDefunct() const
+   {
+      return isDefunct;
+   }
+};
+
+class Hubble : public Satellite
 {
 public:
-   // Members
-   Acceleration acceleration;
+   static constexpr double ORBIT_RADIUS_METERS = 42164000.0;
 
-   // Constructors
-   Satellite() : Entity(), acceleration() {}
-   Satellite(const Position& pos, const Velocity& vel)
-       : Entity(pos, vel), acceleration() {}
-   Satellite(const Position& pos, const Velocity& vel, const Angle& head)
-       : Entity(pos, vel, head), acceleration() {}
-   Satellite(const Position& pos, const Velocity& vel, const Angle& head, double radius)
-       : Entity(pos, vel, head, radius), acceleration() {}
+   explicit Hubble(double phaseRadians = 0.0) : Satellite()
+   {
+      initializeCircularOrbit(ORBIT_RADIUS_METERS, phaseRadians);
+   }
+};
 
-   // Destructor
-   virtual ~Satellite() = default;
+class Starlink : public Satellite
+{
+public:
+   static constexpr double ORBIT_RADIUS_METERS = 13020000.0;
 
-   // Update the satellite's position and velocity using gravity
-   void update(double dt); 
+   explicit Starlink(double phaseRadians = 0.0) : Satellite()
+   {
+      initializeCircularOrbit(ORBIT_RADIUS_METERS, phaseRadians);
+   }
+};
+
+class CrewDragon : public Satellite
+{
+public:
+   static constexpr double ORBIT_RADIUS_METERS = 8000000.0;
+
+   explicit CrewDragon(double phaseRadians = 0.0) : Satellite()
+   {
+      initializeCircularOrbit(ORBIT_RADIUS_METERS, phaseRadians);
+   }
+};
+
+class GPS : public Satellite
+{
+public:
+   static constexpr double ORBIT_RADIUS_METERS = 42164000.0;
+
+   explicit GPS(double phaseRadians = 0.0) : Satellite()
+   {
+      initializeCircularOrbit(ORBIT_RADIUS_METERS, phaseRadians);
+   }
+};
+
+class Sputnik : public Satellite
+{
+public:
+   // Artificially pushed out for visibility at this simulation scale.
+   static constexpr double ORBIT_RADIUS_METERS = 50000000.0;
+
+   explicit Sputnik(double phaseRadians = 0.0) : Satellite()
+   {
+      initializeCircularOrbit(ORBIT_RADIUS_METERS, phaseRadians);
+   }
 };
