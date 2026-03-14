@@ -25,6 +25,29 @@ void Satellite::setRandomSpinRate()
    setAngularVelocity(direction * spinRate);
 }
 
+/******************************************
+ * Satellite : Initialize Circular Orbit
+ * Set this satellite's initial position and velocity for a circular orbit.
+ *****************************************/
+void Satellite::initializeCircularOrbit(double orbitalRadiusMeters, double phaseRadians)
+{
+   if (orbitalRadiusMeters <= 0.0)
+      return;
+
+   constexpr double EARTH_MU = 3.986004418e14; // m^3 / s^2
+
+   const double speed = std::sqrt(EARTH_MU / orbitalRadiusMeters);
+   const double x = orbitalRadiusMeters * std::cos(phaseRadians);
+   const double y = orbitalRadiusMeters * std::sin(phaseRadians);
+   const double vx = -speed * std::sin(phaseRadians);
+   const double vy = speed * std::cos(phaseRadians);
+
+   Position position;
+   position.setMeters(x, y);
+   setPosition(position);
+   setVelocity(Velocity(vx, vy));
+}
+
 
 /******************************************
  * Satellite : Update

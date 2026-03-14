@@ -1,4 +1,5 @@
 #pragma once
+#include "acceleration.h"
 
 class Velocity
 {
@@ -49,5 +50,10 @@ public:
    bool operator!=(const Velocity& v) const
    {
       return !(*this == v);
+   }
+   void update(const Acceleration& acceleration, double dt)
+   {
+      dx += acceleration.ddx * dt;
+      dy += acceleration.ddy * dt;
    }
 };

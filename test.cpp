@@ -10,6 +10,8 @@
 #include "test.h"
 #include "testEntity.h"
 #include "testPosition.h"
+#include "testSatellite.h"
+#include "testShip.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -33,5 +35,7 @@ void testRunner()
    TestPosition().run();
    TestEntity().run();
    TestBreakableEntity().run();
+   TestSatellite().run();
+   TestShip().run();
    TestTimedEntity().run();
 }

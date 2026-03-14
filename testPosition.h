@@ -48,16 +48,16 @@ private:
     *********************************************/
    void construct_default()
    {
-      // setup
+      // SETUP
       double metersFromPixels = Position::metersFromPixels;
       Position::metersFromPixels = 99.9;
-      // exercise
+      // EXERCISE
       Position pos;
-      // verify
+      // VERIFY
       assertEquals(pos.x, 0.0);
       assertEquals(pos.y, 0.0);
       assertEquals(pos.metersFromPixels, 99.9);
-      // teardown
+      // TEARDOWN
       Position::metersFromPixels = metersFromPixels;
    }
 
@@ -68,20 +68,20 @@ private:
     *********************************************/
    void construct_nonDefault()
    {
-      // setup
+      // SETUP
       double metersFromPixels = Position::metersFromPixels;
       Position::metersFromPixels = 99.9;
       double x = 120.0;
       double y = 360.0;
-      // exercise
+      // EXERCISE
       Position pos(x, y);
-      // verify
+      // VERIFY
       assertEquals(pos.x, 120.0);
       assertEquals(pos.y, 360.0);
       assertEquals(pos.metersFromPixels, 99.9);
       assertEquals(x, 120.0);
       assertEquals(y, 360.0);
-      // teardown
+      // TEARDOWN
       Position::metersFromPixels = metersFromPixels;
    }
 
@@ -92,22 +92,22 @@ private:
     *********************************************/
    void construct_copy()
    {
-      // setup
+      // SETUP
       double metersFromPixels = Position::metersFromPixels;
       Position::metersFromPixels = 99.9;
       Position posRHS;
       posRHS.x = 1234.5;
       posRHS.y = 6789.0;
-      // exercise
+      // EXERCISE
       Position pos(posRHS);
-      // verify
+      // VERIFY
       assertEquals(posRHS.x, 1234.5);
       assertEquals(posRHS.y, 6789.0);
       assertEquals(posRHS.metersFromPixels, 99.9);
       assertEquals(pos.x, 1234.5);
       assertEquals(pos.y, 6789.0);
       assertEquals(pos.metersFromPixels, 99.9);
-      // teardown
+      // TEARDOWN
       Position::metersFromPixels = metersFromPixels;
    }
 
@@ -118,7 +118,7 @@ private:
     *********************************************/
    void assign()
    {
-      // setup
+      // SETUP
       double metersFromPixels = Position::metersFromPixels;
       Position::metersFromPixels = 99.9;
       Position posLHS;
@@ -127,16 +127,16 @@ private:
       Position posRHS;
       posRHS.x = 24.68;
       posRHS.y = -13.57;
-      // exercise
+      // EXERCISE
       posLHS = posRHS;
-      // verify
+      // VERIFY
       assertEquals(posRHS.x, 24.68);
       assertEquals(posRHS.y, -13.57);
       assertEquals(posRHS.metersFromPixels, 99.9);
       assertEquals(posLHS.x, 24.68);
       assertEquals(posLHS.y, -13.57);
       assertEquals(posLHS.metersFromPixels, 99.9);
-      // teardown
+      // TEARDOWN
       Position::metersFromPixels = metersFromPixels;
    }
    
@@ -147,20 +147,20 @@ private:
     *********************************************/
    void getMetersX()
    {
-      // setup
+      // SETUP
       double metersFromPixels = Position::metersFromPixels;
       Position::metersFromPixels = 99.9;
       Position pos;
       pos.x = 4500.0;
       pos.y = 2500.0;
-      // exercise
+      // EXERCISE
       double x = pos.getMetersX();
-      // verify
+      // VERIFY
       assertEquals(x, 4500.0);
       assertEquals(pos.x, 4500.0);
       assertEquals(pos.y, 2500.0);
       assertEquals(pos.metersFromPixels, 99.9);
-      // teardown
+      // TEARDOWN
       Position::metersFromPixels = metersFromPixels;
    }
 
@@ -171,20 +171,20 @@ private:
     *********************************************/
    void getMetersY()
    {
-      // setup
+      // SETUP
       double metersFromPixels = Position::metersFromPixels;
       Position::metersFromPixels = 99.9;
       Position pos;
       pos.x = 4500.0;
       pos.y = 2500.0;
-      // exercise
+      // EXERCISE
       double y = pos.getMetersY();
-      // verify
+      // VERIFY
       assertEquals(pos.x, 4500.0);
       assertEquals(pos.y, 2500.0);
       assertEquals(pos.metersFromPixels, 99.9);
       assertEquals(y, 2500.0);
-      // teardown
+      // TEARDOWN
       Position::metersFromPixels = metersFromPixels;
    }
 
@@ -194,19 +194,19 @@ private:
     * output:  pos=(123.4, 888.8)
     *********************************************/
    void setMetersX()
-   {  // setup
+   {  // SETUP
       double metersFromPixels = Position::metersFromPixels;
       Position::metersFromPixels = 99.9;
       Position pos;
       pos.x = 999.9;
       pos.y = 888.8;
-      // exercise
+      // EXERCISE
       pos.setMetersX(123.4);
-      // verify
+      // VERIFY
       assertEquals(pos.x, 123.4);
       assertEquals(pos.y, 888.8);
       assertEquals(pos.metersFromPixels, 99.9);
-      // teardown
+      // TEARDOWN
       Position::metersFromPixels = metersFromPixels;
    }
 
@@ -216,19 +216,19 @@ private:
     * output:  pos=(999.9, 123.4)
     *********************************************/
    void setMetersY()
-   {  // setup
+   {  // SETUP
       double metersFromPixels = Position::metersFromPixels;
       Position::metersFromPixels = 99.9;
       Position pos;
       pos.x = 999.9;
       pos.y = 888.8;
-      // exercise
+      // EXERCISE
       pos.setMetersY(123.4);
-      // verify
+      // VERIFY
       assertEquals(pos.x, 999.9);
       assertEquals(pos.y, 123.4);
       assertEquals(pos.metersFromPixels, 99.9);
-      // teardown
+      // TEARDOWN
       Position::metersFromPixels = metersFromPixels;
    }
 

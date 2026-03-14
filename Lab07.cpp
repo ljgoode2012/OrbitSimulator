@@ -22,6 +22,7 @@
 #include "position.h"      // for POINT
 #include "test.h"
 #include "satellite.h"  // for Sattelite
+#include "ship.h"
 #include "velocity.h"   // for Velocity
 using namespace std;
 
@@ -40,51 +41,51 @@ using namespace std;
 class Demo
 {
 public:
-   std::array<Satellite, 10> gpsSatellites;
+   std::array<GPS, 10> gpsSatellites;
+   Hubble hubble;
+   Sputnik sputnik;
+   Starlink starlink;
+   CrewDragon crewDragon;
+   Ship ship;
 
    Demo(Position ptUpperRight)
        : ptUpperRight(ptUpperRight)
    {
-      // Initializes a satellite in a circular orbit at GEO.
-      // Distance is from Earth's center in meters.
-      // I did some research and found that -3100 isn't super accurate for orbit,
-      // so I used the gravitational constant instead (EARTH_MU) divided by the distance from the Earth (Newton's law)
-      // Speed is in meters per second.
-      constexpr double GEO_RADIUS_METERS = 42164000.0;      // ~42,164 km
-      constexpr double EARTH_MU = 3.986004418e14;           // m^3 / s^2
-      const double geoSpeed = std::sqrt(EARTH_MU / GEO_RADIUS_METERS);
 
       constexpr double TWO_PI = 6.28318530717958647692;
       for (size_t i = 0; i < gpsSatellites.size(); ++i)
       {
          const double theta = (TWO_PI * static_cast<double>(i)) / gpsSatellites.size();
-         const double x = GEO_RADIUS_METERS * std::cos(theta);
-         const double y = GEO_RADIUS_METERS * std::sin(theta);
-         const double vx = -geoSpeed * std::sin(theta);
-         const double vy = geoSpeed * std::cos(theta);
-         Position position;
-         position.setMeters(x, y);
-         gpsSatellites[i].setPosition(position);
-         gpsSatellites[i].setVelocity(Velocity(vx, vy));
+         gpsSatellites[i] = GPS(theta);
       }
+      hubble = Hubble();
+      Position hubblePosition;
+      hubblePosition.setMeters(0.0, -42164000.0);
+      hubble.setPosition(hubblePosition);
+      hubble.setVelocity(Velocity(3100.0, 0.0));
 
-      ptHubble.setPixelsX(ptUpperRight.getPixelsX() * random(-0.5, 0.5));
-      ptHubble.setPixelsY(ptUpperRight.getPixelsY() * random(-0.5, 0.5));
+      crewDragon = CrewDragon();
+      Position crewDragonPosition;
+      crewDragonPosition.setMeters(0.0, 8000000.0);
+      crewDragon.setPosition(crewDragonPosition);
+      crewDragon.setVelocity(Velocity(-7900.0, 0.0));
 
-      ptSputnik.setPixelsX(ptUpperRight.getPixelsX() * random(-0.5, 0.5));
-      ptSputnik.setPixelsY(ptUpperRight.getPixelsY() * random(-0.5, 0.5));
+      starlink = Starlink();
+      Position starlinkPosition;
+      starlinkPosition.setMeters(0.0, -13020000.0);
+      starlink.setPosition(starlinkPosition);
+      starlink.setVelocity(Velocity(5800.0, 0.0));
 
-      ptStarlink.setPixelsX(ptUpperRight.getPixelsX() * random(-0.5, 0.5));
-      ptStarlink.setPixelsY(ptUpperRight.getPixelsY() * random(-0.5, 0.5));
+      sputnik = Sputnik(0.85 * TWO_PI);
 
-      ptCrewDragon.setPixelsX(ptUpperRight.getPixelsX() * random(-0.5, 0.5));
-      ptCrewDragon.setPixelsY(ptUpperRight.getPixelsY() * random(-0.5, 0.5));
-
-      ptShip.setPixelsX(ptUpperRight.getPixelsX() * random(-0.5, 0.5));
-      ptShip.setPixelsY(ptUpperRight.getPixelsY() * random(-0.5, 0.5));
-
-      ptGPS.setPixelsX(ptUpperRight.getPixelsX() * random(-0.5, 0.5));
-      ptGPS.setPixelsY(ptUpperRight.getPixelsY() * random(-0.5, 0.5));
+      Position shipPosition;
+      shipPosition.setPixelsX(-450.0);
+      shipPosition.setPixelsY(450.0);
+      ship = Ship(shipPosition, Velocity(0.0, -2000.0), Angle(0.0));
+      ptFragmentSputnik.setPixelsX(sputnik.getPosition().getPixelsX() + 20.0);
+      ptFragmentSputnik.setPixelsY(sputnik.getPosition().getPixelsY() + 20.0);
+      ptFragmentShip.setPixelsX(ship.getPosition().getPixelsX() + 20.0);
+      ptFragmentShip.setPixelsY(ship.getPosition().getPixelsY() + 20.0);
 
       // Generate stars
       const int NUM_STARS = 200;
@@ -108,20 +109,11 @@ public:
          stars.push_back(star);
       }
 
-      angleShip = 0.0;
       angleEarth = 0.0;
    }
-
-   Position ptHubble;
-   Position ptSputnik;
-   Position ptStarlink;
-   Position ptCrewDragon;
-   Position ptShip;
-   Position ptGPS;
-   Position ptStar;
    Position ptUpperRight;
-
-   double angleShip;
+   Position ptFragmentSputnik;
+   Position ptFragmentShip;
    double angleEarth;
    struct Star
    {
@@ -152,15 +144,12 @@ void callBack(const Interface* pUI, void* p)
    // accept input
    
 
-   // move by a little
-   if (pUI->isUp())
-      pDemo->ptShip.addPixelsY(1.0);
-   if (pUI->isDown())
-      pDemo->ptShip.addPixelsY(-1.0);
    if (pUI->isLeft())
-      pDemo->ptShip.addPixelsX(-1.0);
+      pDemo->ship.turnLeft();
    if (pUI->isRight())
-      pDemo->ptShip.addPixelsX(1.0);
+      pDemo->ship.turnRight();
+   if (pUI->isDown())
+      pDemo->ship.thrustForward(SIM_SECONDS_PER_FRAME);
 
 
    //
@@ -182,13 +171,17 @@ void callBack(const Interface* pUI, void* p)
    if (pDemo->angleEarth < 0.0)
       pDemo->angleEarth += TWO_PI;
 
-   pDemo->angleShip -= 0.01;
    for (auto& star : pDemo->stars)
    {
       star.phase += star.speed; // unsigned char auto-wraps at 255
    }
+   pDemo->hubble.update(SIM_SECONDS_PER_FRAME);
+   pDemo->sputnik.update(SIM_SECONDS_PER_FRAME);
+   pDemo->starlink.update(SIM_SECONDS_PER_FRAME);
+   pDemo->crewDragon.update(SIM_SECONDS_PER_FRAME);
    for (auto& satellite : pDemo->gpsSatellites)
       satellite.update(SIM_SECONDS_PER_FRAME);
+   pDemo->ship.update(SIM_SECONDS_PER_FRAME);
    //
    // draw everything
    //
@@ -197,36 +190,14 @@ void callBack(const Interface* pUI, void* p)
    ogstream gout(pt);
 
    // draw satellites
-   gout.drawCrewDragon(pDemo->ptCrewDragon, pDemo->angleShip);
-   gout.drawHubble    (pDemo->ptHubble,     pDemo->angleShip);
-   gout.drawSputnik   (pDemo->ptSputnik,    pDemo->angleShip);
-   gout.drawStarlink  (pDemo->ptStarlink,   pDemo->angleShip);
-   gout.drawShip      (pDemo->ptShip,       pDemo->angleShip, pUI->isSpace());
-   gout.drawGPS       (pDemo->ptGPS,        pDemo->angleShip);
+   gout.drawCrewDragon(pDemo->crewDragon.getPosition(), pDemo->crewDragon.getRotation());
+   gout.drawHubble    (pDemo->hubble.getPosition(),     pDemo->hubble.getRotation());
+   gout.drawSputnik   (pDemo->sputnik.getPosition(),    pDemo->sputnik.getRotation());
+   gout.drawStarlink  (pDemo->starlink.getPosition(),   pDemo->starlink.getRotation());
+   gout.drawShip      (pDemo->ship.getPosition(),       pDemo->ship.getRotation(), pUI->isDown());
    for (const auto& satellite : pDemo->gpsSatellites)
       gout.drawGPS(satellite.getPosition(), satellite.getRotation());
 
-   // draw parts
-   pt.setPixelsX(pDemo->ptCrewDragon.getPixelsX() + 20);
-   pt.setPixelsY(pDemo->ptCrewDragon.getPixelsY() + 20);
-   gout.drawCrewDragonRight(pt, pDemo->angleShip); // notice only two parameters are set
-   pt.setPixelsX(pDemo->ptHubble.getPixelsX() + 20);
-   pt.setPixelsY(pDemo->ptHubble.getPixelsY() + 20);
-   gout.drawHubbleLeft(pt, pDemo->angleShip);      // notice only two parameters are set
-   pt.setPixelsX(pDemo->ptGPS.getPixelsX() + 20);
-   pt.setPixelsY(pDemo->ptGPS.getPixelsY() + 20);
-   gout.drawGPSCenter(pt, pDemo->angleShip);       // notice only two parameters are set
-   pt.setPixelsX(pDemo->ptStarlink.getPixelsX() + 20);
-   pt.setPixelsY(pDemo->ptStarlink.getPixelsY() + 20);
-   gout.drawStarlinkArray(pt, pDemo->angleShip);   // notice only two parameters are set
-
-   // draw fragments
-   pt.setPixelsX(pDemo->ptSputnik.getPixelsX() + 20);
-   pt.setPixelsY(pDemo->ptSputnik.getPixelsY() + 20);
-   gout.drawFragment(pt, pDemo->angleShip);
-   pt.setPixelsX(pDemo->ptShip.getPixelsX() + 20);
-   pt.setPixelsY(pDemo->ptShip.getPixelsY() + 20);
-   gout.drawFragment(pt, pDemo->angleShip);
 
    // draw stars
    for (const auto& star : pDemo->stars)

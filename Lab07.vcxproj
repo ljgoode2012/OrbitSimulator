@@ -148,6 +148,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="acceleration.h" />
+    <ClInclude Include="angle.h" />
     <ClInclude Include="breakableEntity.h" />
     <ClInclude Include="entity.h" />
     <ClInclude Include="position.h" />
