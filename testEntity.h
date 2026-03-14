@@ -6,6 +6,7 @@
 #include "breakableEntity.h"
 #include "timedEntity.h"
 #include "unitTest.h"
+#include "constants.h"  // Add this include
 
 class EntityDouble : public Entity
 {
@@ -39,11 +40,12 @@ public:
       update_nonZeroAngularVelocityChangesRotation();
       update_rotationWrapsPositive();
       update_rotationWrapsNegative();
+      update_negativeTimeDelta();
       report("Entity");
    }
 
 private:
-   static constexpr double TWO_PI = 6.28318530717958647692;
+   static constexpr double TWO_PI = 2.0 * M_PI;  // Use M_PI from constants.h
 
    void construct_default()
    {
@@ -246,6 +248,41 @@ private:
 
       // TEARDOWN
       entityPtr.reset();
+   }
+   void update_negativeTimeDelta()
+   {
+      // SETUP
+      EntityDouble entity;
+      entity.setPosition(Position(0.0, 0.0));
+      entity.setVelocity(Velocity(10.0, 20.0));
+
+      // EXERCISE
+      entity.update(-1.0);
+
+      // VERIFY - Entity should move backwards (reverse time)
+      assertEquals(entity.getPosition().getMetersX(), -10.0); // 0 + (10 * -1)
+      assertEquals(entity.getPosition().getMetersY(), -20.0); // 0 + (20 * -1)
+      assertEquals(entity.getVelocityDX(),
+                   10.0); // Velocity unchanged (no gravity at origin)
+      assertEquals(entity.getVelocityDY(), 20.0); // Velocity unchanged
+   }
+   void update_zeroTimeDelta()
+   {
+      // SETUP
+      EntityDouble entity;
+      entity.setPosition(Position(100.0, 200.0));
+      entity.setVelocity(Velocity(10.0, 20.0));
+      entity.setAngularVelocity(0.5);
+
+      // EXERCISE
+      entity.update(0.0); // Zero time - nothing should change
+
+      // VERIFY
+      assertEquals(entity.getPosition().getMetersX(), 100.0);
+      assertEquals(entity.getPosition().getMetersY(), 200.0);
+      assertEquals(entity.getVelocityDX(), 10.0);
+      assertEquals(entity.getVelocityDY(), 20.0);
+      assertEquals(entity.getRotation(), 0.0);
    }
 };
 

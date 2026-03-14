@@ -1,15 +1,16 @@
 /***********************************************************************
  * Source File:
- *    Point : The representation of a position on the screen
+ *    Satellite : The representation of a satellite in orbit
  * Author:
  *    Lindsey Goode and Porter Williams
  * Summary:
- *    Everything we need to know about a location on the screen.
+ *    Everything we need to know about a satellite in orbit
  ************************************************************************/
 
 #include "satellite.h"
 #include "constants.h"
 #include <cmath>
+#include <cstdlib>  // Add this - needed for std::rand() and RAND_MAX
 /******************************************
  * Satellite : Random Spin Rate
  * Initialize the angular velocity to a random spin rate.
@@ -20,8 +21,9 @@ void Satellite::setRandomSpinRate()
    constexpr double MIN_SPIN_RATE = 0.001;
    constexpr double MAX_SPIN_RATE = 0.010;
 
-   const double percent = static_cast<double>(std::rand()) / static_cast<double>(RAND_MAX);
-   const double spinRate = MIN_SPIN_RATE + percent * (MAX_SPIN_RATE - MIN_SPIN_RATE);
+   const double spinRate = MIN_SPIN_RATE +
+      (static_cast<double>(std::rand()) / static_cast<double>(RAND_MAX))
+      * (MAX_SPIN_RATE - MIN_SPIN_RATE);
    const double direction = (std::rand() % 2 == 0) ? 1.0 : -1.0;
    setAngularVelocity(direction * spinRate);
 }
