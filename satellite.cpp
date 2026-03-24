@@ -2,7 +2,7 @@
  * Source File:
  *    Satellite : The representation of a satellite in orbit
  * Author:
- *    Lindsey Goode and Porter Williams
+ *    Lindsey Goode, Porter Williams
  * Summary:
  *    Everything we need to know about a satellite in orbit
  ************************************************************************/
