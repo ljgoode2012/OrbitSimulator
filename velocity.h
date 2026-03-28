@@ -22,12 +22,7 @@ public:
    double getDX() const { return dx; }
    double getDY() const { return dy; }
    double getSpeed() const { return std::sqrt(dx * dx + dy * dy); }
-   Angle getAngle() const
-   {
-      Angle angle;
-      angle.setDxDy(dx, dy);
-      return angle;
-   }
+   Angle getAngle() const;
 
    // Setters
    void set(const Angle& angle, double magnitude)
@@ -56,15 +51,7 @@ public:
    }
 
    // operators
-   Velocity& operator=(const Velocity& v)
-   {
-      if (this != &v)
-      {
-         dx = v.dx;
-         dy = v.dy;
-      }
-      return *this;
-   }
+   Velocity& operator=(const Velocity& v);
    Velocity operator+(const Velocity& v) const
    {
       return Velocity(dx + v.dx, dy + v.dy);

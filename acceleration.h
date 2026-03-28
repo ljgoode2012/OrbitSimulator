@@ -47,15 +47,7 @@ public:
    void add(const Acceleration& rhs);
 
    // Operators
-   Acceleration& operator=(const Acceleration& a)
-   {
-      if (this != &a)
-      {
-         ddx = a.ddx;
-         ddy = a.ddy;
-      }
-      return *this;
-   }
+   Acceleration& operator=(const Acceleration& a);
    Acceleration operator+(const Acceleration& rhs) const { Acceleration aReturn(*this); aReturn.add(rhs); return aReturn; }
    Acceleration& operator+=(const Acceleration& a) { ddx += a.ddx; ddy += a.ddy; return *this; }
    Acceleration operator-(const Acceleration& a) const { return Acceleration(ddx - a.ddx, ddy - a.ddy); }

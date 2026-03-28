@@ -14,20 +14,21 @@
  * Angle : normalize
  * Normalize radians to 0 to 2*PI
  *****************************************/
-double Angle::normalize(double radians) const
+double Angle::normalize(double radians)
 {
-   while (radians < 0.0)
+   radians = std::fmod(radians, M_PI * 2.0);
+   if (radians < 0.0)
       radians += M_PI * 2.0;
-   while (radians >= M_PI * 2.0)
-      radians -= M_PI * 2.0;
    return radians;
 }
 
 /******************************************
- * Angle : setNaturalRadians
- * Set radians without normalization
+ * Angle : assignment operator
+ * Assign from another angle
  *****************************************/
-void Angle::setNaturalRadians(double radians)
+Angle& Angle::operator=(const Angle& a)
 {
-   this->radians = radians;
+   if (this != &a)
+      radians = a.radians;
+   return *this;
 }

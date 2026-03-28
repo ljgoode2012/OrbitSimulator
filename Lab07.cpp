@@ -13,9 +13,11 @@
  *****************************************************************/
 
 #include <cassert>      // for ASSERT
+#include <algorithm>
 #include <cmath>        // for sqrt()
-#include <array>
+#include <memory>
 #include <vector>
+#include <utility>
 #include "constants.h"
 
 #include "uiInteract.h" // for INTERFACE
@@ -24,8 +26,74 @@
 #include "test.h"
 #include "satellite.h"  // for Sattelite
 #include "ship.h"
+#include "projectile.h"
 #include "velocity.h"   // for Velocity
 using namespace std;
+namespace
+{
+   constexpr double EARTH_COLLISION_RADIUS_PIXELS = 50.0;
+
+   bool isCollidingWithEarth(const Entity& entity)
+   {
+      const double entityRadiusPixels = entity.getCollisionRadiusPixels();
+      if (entityRadiusPixels <= 0.0)
+         return false;
+
+      const double xMeters = entity.getPosition().getMetersX();
+      const double yMeters = entity.getPosition().getMetersY();
+      const double distanceMeters = std::sqrt(xMeters * xMeters + yMeters * yMeters);
+      const double collisionRadiusMeters =
+         (EARTH_COLLISION_RADIUS_PIXELS + entityRadiusPixels) * entity.getPosition().getZoom();
+      return distanceMeters <= collisionRadiusMeters;
+   }
+   bool isCollisionImmune(const Entity& entity)
+   {
+      const Fragment* fragment = dynamic_cast<const Fragment*>(&entity);
+      if (fragment != nullptr && fragment->isCollisionImmune())
+         return true;
+
+      const SatellitePart* part = dynamic_cast<const SatellitePart*>(&entity);
+      return part != nullptr && part->isCollisionImmune();
+   }
+   bool areColliding(const Entity& lhs, const Entity& rhs)
+   {
+      if (isCollisionImmune(lhs) || isCollisionImmune(rhs))
+         return false;
+      const double lhsRadiusPixels = lhs.getCollisionRadiusPixels();
+      const double rhsRadiusPixels = rhs.getCollisionRadiusPixels();
+      if (lhsRadiusPixels <= 0.0 || rhsRadiusPixels <= 0.0)
+         return false;
+
+      const double collisionRadiusMeters =
+         (lhsRadiusPixels + rhsRadiusPixels) * lhs.getPosition().getZoom();
+      const double distanceMeters = computeDistance(lhs.getPosition(), rhs.getPosition());
+      return distanceMeters <= collisionRadiusMeters;
+   }
+
+   void breakEntity(const Entity& entity, std::vector<std::unique_ptr<Entity>>& spawnedDebris)
+   {
+      const Satellite* satellite = dynamic_cast<const Satellite*>(&entity);
+      if (satellite != nullptr)
+      {
+         satellite->createBreakupDebris(spawnedDebris);
+         return;
+      }
+
+      const SatellitePart* part = dynamic_cast<const SatellitePart*>(&entity);
+      if (part != nullptr && part->getFragmentsOnBreak() > 0)
+         createFragmentsFromEntity(entity, part->getFragmentsOnBreak(), spawnedDebris);
+   }
+
+   bool shouldRemoveEntity(const std::unique_ptr<Entity>& entity)
+   {
+      const Projectile* projectile = dynamic_cast<const Projectile*>(entity.get());
+      if (projectile != nullptr && projectile->isExpired())
+         return true;
+
+      const Fragment* fragment = dynamic_cast<const Fragment*>(entity.get());
+      return fragment != nullptr && fragment->isExpired();
+   }
+}
 
 
 
@@ -37,51 +105,31 @@ using namespace std;
 class Demo
 {
 public:
-   std::array<GPS, 10> gpsSatellites;
-   Hubble hubble;
-   Sputnik sputnik;
-   Starlink starlink;
-   CrewDragon crewDragon;
-   Ship ship;
 
-   Demo(Position ptUpperRight)
-       : ptUpperRight(ptUpperRight)
+   Demo(const Position& ptUpperRight)
+       : ptUpperRight(ptUpperRight), angleEarth(0.0), ship(nullptr)
    {
 
       constexpr double TWO_PI = 6.28318530717958647692;
-      for (size_t i = 0; i < gpsSatellites.size(); ++i)
+      constexpr int GPS_SATELLITE_COUNT = 10;
+
+      entities.push_back(std::unique_ptr<Entity>(new Hubble()));
+      entities.push_back(std::unique_ptr<Entity>(new Sputnik()));
+      entities.push_back(std::unique_ptr<Entity>(new Starlink()));
+      entities.push_back(std::unique_ptr<Entity>(new CrewDragon()));
+
+      for (int i = 0; i < GPS_SATELLITE_COUNT; ++i)
       {
-         const double theta = (TWO_PI * static_cast<double>(i)) / gpsSatellites.size();
-         gpsSatellites[i] = GPS(theta);
+         const double theta = (TWO_PI * static_cast<double>(i)) / GPS_SATELLITE_COUNT;
+         entities.push_back(std::unique_ptr<Entity>(new GPS(theta)));
       }
-      hubble = Hubble();
-      Position hubblePosition;
-      hubblePosition.setMeters(0.0, -42164000.0);
-      hubble.setPosition(hubblePosition);
-      hubble.setVelocity(Velocity(3100.0, 0.0));
-
-      crewDragon = CrewDragon();
-      Position crewDragonPosition;
-      crewDragonPosition.setMeters(0.0, 8000000.0);
-      crewDragon.setPosition(crewDragonPosition);
-      crewDragon.setVelocity(Velocity(-7900.0, 0.0));
-
-      starlink = Starlink();
-      Position starlinkPosition;
-      starlinkPosition.setMeters(0.0, -13020000.0);
-      starlink.setPosition(starlinkPosition);
-      starlink.setVelocity(Velocity(5800.0, 0.0));
-
-      sputnik = Sputnik(0.85 * TWO_PI);
 
       Position shipPosition;
       shipPosition.setPixelsX(-450.0);
       shipPosition.setPixelsY(450.0);
-      ship = Ship(shipPosition, Velocity(0.0, -2000.0), Angle(0.0));
-      ptFragmentSputnik.setPixelsX(sputnik.getPosition().getPixelsX() + 20.0);
-      ptFragmentSputnik.setPixelsY(sputnik.getPosition().getPixelsY() + 20.0);
-      ptFragmentShip.setPixelsX(ship.getPosition().getPixelsX() + 20.0);
-      ptFragmentShip.setPixelsY(ship.getPosition().getPixelsY() + 20.0);
+      Ship* managedShip = new Ship(shipPosition, Velocity(0.0, -2000.0), Angle(0.0));
+      ship = managedShip;
+      entities.push_back(std::unique_ptr<Entity>(managedShip));
 
       // Generate stars
 
@@ -104,12 +152,11 @@ public:
          stars.push_back(star);
       }
 
-      angleEarth = 0.0;
    }
    Position ptUpperRight;
-   Position ptFragmentSputnik;
-   Position ptFragmentShip;
    double angleEarth;
+   Ship* ship;
+   std::vector<std::unique_ptr<Entity>> entities;
    struct Star
    {
       Position position;
@@ -139,12 +186,22 @@ void callBack(const Interface* pUI, void* p)
    // accept input
    
 
-   if (pUI->isLeft())
-      pDemo->ship.turnLeft();
-   if (pUI->isRight())
-      pDemo->ship.turnRight();
-   if (pUI->isDown())
-      pDemo->ship.thrustForward(SIM_SECONDS_PER_FRAME);
+   if (pDemo->ship != nullptr)
+   {
+      if (pUI->isLeft())
+         pDemo->ship->turnLeft();
+      if (pUI->isRight())
+         pDemo->ship->turnRight();
+
+      const bool isThrusting = pUI->isDown();
+      pDemo->ship->setThrusting(isThrusting);
+      if (isThrusting)
+         pDemo->ship->thrustForward(SIM_SECONDS_PER_FRAME);
+      if (pUI->isSpace())
+      {
+         pDemo->entities.push_back(std::unique_ptr<Entity>(new Projectile(Projectile::createFromShip(*pDemo->ship))));
+      }
+   }
 
 
    //
@@ -170,13 +227,54 @@ void callBack(const Interface* pUI, void* p)
    {
       star.phase += star.speed; // unsigned char auto-wraps at 255
    }
-   pDemo->hubble.update(SIM_SECONDS_PER_FRAME);
-   pDemo->sputnik.update(SIM_SECONDS_PER_FRAME);
-   pDemo->starlink.update(SIM_SECONDS_PER_FRAME);
-   pDemo->crewDragon.update(SIM_SECONDS_PER_FRAME);
-   for (auto& satellite : pDemo->gpsSatellites)
-      satellite.update(SIM_SECONDS_PER_FRAME);
-   pDemo->ship.update(SIM_SECONDS_PER_FRAME);
+   for (auto& entity : pDemo->entities)
+      entity->update(SIM_SECONDS_PER_FRAME);
+   std::vector<bool> removeEntity(pDemo->entities.size(), false);
+   std::vector<std::unique_ptr<Entity>> spawnedDebris;
+
+   for (size_t i = 0; i < pDemo->entities.size(); ++i)
+   {
+      for (size_t j = i + 1; j < pDemo->entities.size(); ++j)
+      {
+         if (removeEntity[i] || removeEntity[j])
+            continue;
+
+         if (!areColliding(*pDemo->entities[i], *pDemo->entities[j]))
+            continue;
+
+         breakEntity(*pDemo->entities[i], spawnedDebris);
+         breakEntity(*pDemo->entities[j], spawnedDebris);
+         removeEntity[i] = true;
+         removeEntity[j] = true;
+      }
+   }
+
+   for (size_t i = 0; i < pDemo->entities.size(); ++i)
+   {
+      if (removeEntity[i])
+         continue;
+
+      if (!isCollidingWithEarth(*pDemo->entities[i]))
+         continue;
+
+      breakEntity(*pDemo->entities[i], spawnedDebris);
+      removeEntity[i] = true;
+   }
+
+   std::vector<std::unique_ptr<Entity>> survivors;
+   survivors.reserve(pDemo->entities.size());
+   for (size_t i = 0; i < pDemo->entities.size(); ++i)
+   {
+      if (pDemo->entities[i].get() == pDemo->ship && (removeEntity[i] || shouldRemoveEntity(pDemo->entities[i])))
+         pDemo->ship = nullptr;
+      if (!removeEntity[i] && !shouldRemoveEntity(pDemo->entities[i]))
+         survivors.push_back(std::move(pDemo->entities[i]));
+   }
+
+   for (std::unique_ptr<Entity>& debris : spawnedDebris)
+      survivors.push_back(std::move(debris));
+
+   pDemo->entities = std::move(survivors);
    //
    // draw everything
    //
@@ -184,14 +282,9 @@ void callBack(const Interface* pUI, void* p)
    Position pt;
    ogstream gout(pt);
 
-   // draw satellites
-   gout.drawCrewDragon(pDemo->crewDragon.getPosition(), pDemo->crewDragon.getRotation());
-   gout.drawHubble    (pDemo->hubble.getPosition(),     pDemo->hubble.getRotation());
-   gout.drawSputnik   (pDemo->sputnik.getPosition(),    pDemo->sputnik.getRotation());
-   gout.drawStarlink  (pDemo->starlink.getPosition(),   pDemo->starlink.getRotation());
-   gout.drawShip      (pDemo->ship.getPosition(),       pDemo->ship.getRotation(), pUI->isDown());
-   for (const auto& satellite : pDemo->gpsSatellites)
-      gout.drawGPS(satellite.getPosition(), satellite.getRotation());
+   // draw entities
+   for (const auto& entity : pDemo->entities)
+      entity->draw(gout);
 
 
    // draw stars

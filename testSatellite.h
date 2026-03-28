@@ -6,6 +6,13 @@
 #include "satellite.h"
 #include "unitTest.h"
 
+class SatelliteDouble : public Satellite
+{
+public:
+   SatelliteDouble() : Satellite() {}
+   void setRotationRadians(double radians) { setRotation(Angle(radians)); }
+};
+
 class HubbleDouble : public Hubble
 {
 public:
@@ -31,14 +38,18 @@ public:
       gps_orbitRadiusAndSpeed();
       gps_phaseControlsInitialPositionAndVelocity();
       sputnik_orbitIsFarthest();
+      satellites_initializeWithCounterClockwiseEarthFacingRotation();
       satellite_setIsDefunctTrue_assignsRandomSpinRate();
       satellite_setIsDefunctFalse_resetsSpinRate();
+      satellite_update_notDefunctFacesEarth();
+      satellite_update_defunctUsesAngularVelocity();
       report("Satellite");
    }
 
 private:
    static constexpr double EARTH_MU = 3.986004418e14;
    static constexpr double HALF_PI = 1.57079632679489661923;
+   static constexpr double COUNTERCLOCKWISE_OFFSET_RADIANS = -HALF_PI;
    static constexpr double MIN_SPIN_RATE = 0.001;
    static constexpr double MAX_SPIN_RATE = 0.010;
 
@@ -56,6 +67,14 @@ private:
    static double circularOrbitSpeed(double radiusMeters)
    {
       return std::sqrt(EARTH_MU / radiusMeters);
+   }
+
+   static double earthFacingRotationRadians(const Position& position)
+   {
+      Angle earthFacingRotation;
+      earthFacingRotation.setDxDy(-position.getMetersX(), -position.getMetersY());
+      earthFacingRotation.addRadians(COUNTERCLOCKWISE_OFFSET_RADIANS);
+      return earthFacingRotation.getRadians();
    }
 
    void hubble_orbitRadiusAndSpeed()
@@ -129,6 +148,42 @@ private:
       // TEARDOWN
    }
 
+   void satellites_initializeWithCounterClockwiseEarthFacingRotation()
+   {
+      // SETUP
+      std::unique_ptr<Hubble> hubblePtr(new Hubble);
+      std::unique_ptr<Starlink> starlinkPtr(new Starlink);
+      std::unique_ptr<CrewDragon> crewDragonPtr(new CrewDragon);
+      std::unique_ptr<GPS> gpsPtr(new GPS);
+      std::unique_ptr<Sputnik> sputnikPtr(new Sputnik);
+
+      // EXERCISE
+
+      // VERIFY
+      assertEqualsTolerance(hubblePtr->getRotation(),
+                            earthFacingRotationRadians(hubblePtr->getPosition()),
+                            0.0001);
+      assertEqualsTolerance(starlinkPtr->getRotation(),
+                            earthFacingRotationRadians(starlinkPtr->getPosition()),
+                            0.0001);
+      assertEqualsTolerance(crewDragonPtr->getRotation(),
+                            earthFacingRotationRadians(crewDragonPtr->getPosition()),
+                            0.0001);
+      assertEqualsTolerance(gpsPtr->getRotation(),
+                            earthFacingRotationRadians(gpsPtr->getPosition()),
+                            0.0001);
+      assertEqualsTolerance(sputnikPtr->getRotation(),
+                            earthFacingRotationRadians(sputnikPtr->getPosition()),
+                            0.0001);
+
+      // TEARDOWN
+      hubblePtr.reset();
+      starlinkPtr.reset();
+      crewDragonPtr.reset();
+      gpsPtr.reset();
+      sputnikPtr.reset();
+   }
+
    void satellite_setIsDefunctTrue_assignsRandomSpinRate()
    {
       // SETUP
@@ -163,6 +218,48 @@ private:
       // VERIFY
       assertUnit(!satellite.getIsDefunct());
       assertEquals(satellite.getAngularVelocity(), 0.0);
+
+      // TEARDOWN
+      satellitePtr.reset();
+   }
+
+   void satellite_update_notDefunctFacesEarth()
+   {
+      // SETUP
+      std::unique_ptr<SatelliteDouble> satellitePtr(new SatelliteDouble);
+      SatelliteDouble& satellite = *satellitePtr;
+      satellite.setIsDefunct(false);
+      satellite.setPosition(Position(7000000.0, 0.0));
+      satellite.setVelocity(Velocity(0.0, 0.0));
+      satellite.setRotationRadians(0.0);
+
+      // EXERCISE
+      satellite.update(0.0);
+
+      // VERIFY
+      const double expectedRotation = earthFacingRotationRadians(satellite.getPosition());
+      assertEqualsTolerance(satellite.getRotation(), expectedRotation, 0.0001);
+
+      // TEARDOWN
+      satellitePtr.reset();
+   }
+
+   void satellite_update_defunctUsesAngularVelocity()
+   {
+      // SETUP
+      std::unique_ptr<SatelliteDouble> satellitePtr(new SatelliteDouble);
+      SatelliteDouble& satellite = *satellitePtr;
+      satellite.setIsDefunct(true);
+      satellite.setPosition(Position(7000000.0, 0.0));
+      satellite.setVelocity(Velocity(0.0, 0.0));
+      satellite.setRotationRadians(0.0);
+      satellite.setAngularVelocity(0.5);
+
+      // EXERCISE
+      satellite.update(2.0);
+
+      // VERIFY
+      assertEqualsTolerance(satellite.getRotation(), 1.0, 0.0001);
 
       // TEARDOWN
       satellitePtr.reset();

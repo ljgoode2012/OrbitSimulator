@@ -22,28 +22,24 @@
 
 void Entity::update(double dt)
 {
-   // Acceleration due to gravity at the entity's current position.
-   const double x = position.getMetersX();
-   const double y = position.getMetersY();
-   const double r2 = x * x + y * y;
+   const Acceleration gravityAcceleration = computeGravityAcceleration(position);
+   velocity.update(gravityAcceleration, dt);
+   position.update(velocity, dt);
+   rotation.addRadians(angularVelocity * dt);
+}
 
-   Acceleration acceleration;
-   if (r2 > 0.0)
-   {
-      const double r = std::sqrt(r2);
-      const double r3 = r2 * r;
-      acceleration.setDDX((-MU * x) / r3);
-      acceleration.setDDY((-MU * y) / r3);
-   }
-   else
-   {
-      acceleration.setDDX(0.0);
-      acceleration.setDDY(0.0);
-   }
+Acceleration Entity::computeGravityAcceleration(const Position& position)
+{
+   const double xMeters = position.getMetersX();
+   const double yMeters = position.getMetersY();
+   const double radiusSquared = xMeters * xMeters + yMeters * yMeters;
 
-   velocity.addDX(acceleration.getDDX() * dt);
-   velocity.addDY(acceleration.getDDY() * dt);
+   if (radiusSquared <= 0.0)
+      return Acceleration();
 
-   position.setMetersX(position.getMetersX() + velocity.getDX() * dt);
-   position.setMetersY(position.getMetersY() + velocity.getDY() * dt);
+   const double radius = std::sqrt(radiusSquared);
+   const double radiusCubed = radiusSquared * radius;
+   const double accelerationX = (-MU * xMeters) / radiusCubed;
+   const double accelerationY = (-MU * yMeters) / radiusCubed;
+   return Acceleration(accelerationX, accelerationY);
 }

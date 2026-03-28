@@ -7,6 +7,7 @@
 
 #include "position.h"
 #include "velocity.h"
+class ogstream;
 
 class Entity
 {
@@ -28,18 +29,24 @@ public:
    const Position& getPosition() const { return position; }
    const Angle& getRotation() const { return rotation; }
    double getAngularVelocity() const { return angularVelocity; }
+   double getVelocityDX() const { return velocity.dx; }
+   double getVelocityDY() const { return velocity.dy; }
 
    // setters
    void setPosition(const Position& position) { this->position = position; }
    void setVelocity(const Velocity& velocity) { this->velocity = velocity; }
    void setAngularVelocity(double angularVelocity) { this->angularVelocity = angularVelocity; }
    // Update the entity's position and velocity using basic kinematics
-   virtual void update(double dt)
+   virtual void update(double dt);
+
+   virtual void draw(ogstream& gout) const
    {
-      const Acceleration gravityAcceleration = computeGravityAcceleration(position);
-      velocity.update(gravityAcceleration, dt);
-      position.update(velocity, dt);
-      rotation.addRadians(angularVelocity * dt);
+      (void)gout;
+   }
+
+   virtual double getCollisionRadiusPixels() const
+   {
+      return 0.0;
    }
 
 protected:
@@ -51,22 +58,7 @@ protected:
    }
 
 private:
-   static Acceleration computeGravityAcceleration(const Position& position)
-   {
-
-      const double xMeters = position.getMetersX();
-      const double yMeters = position.getMetersY();
-      const double radiusSquared = xMeters * xMeters + yMeters * yMeters;
-
-      if (radiusSquared <= 0.0)
-         return Acceleration();
-
-      const double radius = std::sqrt(radiusSquared);
-      const double radiusCubed = radiusSquared * radius;
-      const double accelerationX = (-MU * xMeters) / radiusCubed;
-      const double accelerationY = (-MU * yMeters) / radiusCubed;
-      return Acceleration(accelerationX, accelerationY);
-   }
+   static Acceleration computeGravityAcceleration(const Position& position);
    Position position;
    Velocity velocity;
    Angle rotation;

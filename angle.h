@@ -106,14 +106,7 @@ public:
       setRadians(radians + deltaRadians);
    }
 
-   Angle& operator=(const Angle& a)
-   {
-      if (this != &a)
-      {
-         radians = a.radians;
-      }
-      return *this;
-   }
+   Angle& operator=(const Angle& a);
 
    operator double() const
    {
@@ -121,13 +114,7 @@ public:
    }
 
 private:
-   static double normalize(double radians)
-   {
-      radians = std::fmod(radians, M_PI * 2.0);
-      if (radians < 0.0)
-         radians += M_PI * 2.0;
-      return radians;
-   }
+   static double normalize(double radians);
 
    double radians;
 };

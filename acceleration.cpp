@@ -30,3 +30,13 @@ void Acceleration::add(const Acceleration& rhs)
    ddx += rhs.getDDX();
    ddy += rhs.getDDY();
 }
+
+Acceleration& Acceleration::operator=(const Acceleration& a)
+{
+   if (this != &a)
+   {
+      ddx = a.ddx;
+      ddy = a.ddy;
+   }
+   return *this;
+}
