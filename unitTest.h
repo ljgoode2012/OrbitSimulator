@@ -17,37 +17,40 @@
 
 #define NOT_YET_IMPLEMENTED false
 
-#define assertEqualsTolerance(value, test, tol) assertUnitParameters(closeEnough(value, test, tol), #test, __LINE__, __FUNCTION__)
-#define assertEquals(value, test) assertUnitParameters(closeEnough(value, test), #test, __LINE__, __FUNCTION__)
-#define assertUnit(condition)              assertUnitParameters(condition, #condition, __LINE__, __FUNCTION__)
+#define assertEqualsTolerance(value, test, tol)                                \
+   assertUnitParameters(closeEnough(value, test, tol), #test, __LINE__,        \
+                        __FUNCTION__)
+#define assertEquals(value, test)                                              \
+   assertUnitParameters(closeEnough(value, test), #test, __LINE__, __FUNCTION__)
+#define assertUnit(condition)                                                  \
+   assertUnitParameters(condition, #condition, __LINE__, __FUNCTION__)
 
-#include <iostream>  // for std::cerr
-#include <iomanip>   // for std::setw
-#include <string>    // for std::string
-#include <vector>    // for std::vector
-#include <map>       // for std::map
+#include <iomanip>  // for std::setw
+#include <iostream> // for std::cerr
+#include <map>      // for std::map
+#include <string>   // for std::string
+#include <vector>   // for std::vector
 
 class UnitTest
 {
 public:
    UnitTest() { reset(); }
-   
+
 private:
    // a test failure is a failure string and a line number
    struct Failure
    {
       std::string failure;
-      int         lineNumber;
+      int lineNumber;
    };
 
    // each test has a name (the key) and the list of failures(value).
    std::map<std::string, std::vector<Failure>> tests;
 
 protected:
-
    // for closeEnough() and assertEquals(), what is the tolerance?
    double tolerance = 0.0001;
-   
+
    // utility function because floating point numbers are approximations
    bool closeEnough(double value, double test) const
    {
@@ -63,24 +66,21 @@ protected:
     * RESET
     * Reset the statistics
     *************************************************************/
-   void reset()
-   {
-      tests.clear();
-   }
-   
+   void reset() { tests.clear(); }
+
    /*************************************************************
     * REPORT
     * Report the statistics
     *************************************************************/
-   void report(const char * name)
-   {    
+   void report(const char* name)
+   {
       // enumerate the failures, if there are any
-      for (auto & test : tests)
+      for (auto& test : tests)
          if (!test.second.empty())
          {
             std::cout << "\t" << test.first << "()\n";
-            for (auto & failure : test.second)
-               std::cout << "\t\tline:"   << failure.lineNumber
+            for (auto& failure : test.second)
+               std::cout << "\t\tline:" << failure.lineNumber
                          << " condition:" << failure.failure << "\n";
          }
 
@@ -103,15 +103,14 @@ protected:
       // display the summary
       std::cout.setf(std::ios::fixed | std::ios::showpoint);
       std::cout.precision(1);
-      std::cout << "There were "
-         << tests.size()
-         << " tests run for a success rate of: "
-         << (successRate * 100.0) << "%\n";
+      std::cout << "There were " << tests.size()
+                << " tests run for a success rate of: " << (successRate * 100.0)
+                << "%\n";
 
       // after we have reported, the reset for the next report
       reset();
    }
-   
+
    /*************************************************************
     * ASSERT UNIT PARAMETERS
     * Custom assert code so we can see all the errors at once
@@ -133,6 +132,4 @@ protected:
          tests[sFunc];
       }
    }
-   
-
 };

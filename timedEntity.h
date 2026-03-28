@@ -1,7 +1,21 @@
+/***********************************************************************
+ * Header File:
+ *    TimedEntity : An entity with a limited lifetime
+ * Author:
+ *    Lindsey Goode, Porter Williams
+ * Summary:
+ *    An entity that expires after a certain amount of time
+ ************************************************************************/
+
 #pragma once
 
 #include "entity.h"
 
+/*********************************************
+ * TimedEntity
+ * An entity that tracks its age and
+ * expires after a set time period
+ *********************************************/
 class TimedEntity : public Entity
 {
 public:

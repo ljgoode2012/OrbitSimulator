@@ -1,6 +1,6 @@
 /***********************************************************************
  * Header File:
- *    Angle: The representation of an acceleration (or deceleration)
+ *    Acceleration: The representation of an acceleration (or deceleration)
  * Author:
  *    Lindsey Goode, Porter Williams
  * Summary:
@@ -13,13 +13,11 @@
 
 class TestAcceleration;
 
-
 /*********************************************
  * Acceleration
  * An acceleration is just two doubles representing
  * the change in velocity in the x and y directions
  *********************************************/
-
 
 class Acceleration
 {
@@ -48,11 +46,32 @@ public:
 
    // Operators
    Acceleration& operator=(const Acceleration& a);
-   Acceleration operator+(const Acceleration& rhs) const { Acceleration aReturn(*this); aReturn.add(rhs); return aReturn; }
-   Acceleration& operator+=(const Acceleration& a) { ddx += a.ddx; ddy += a.ddy; return *this; }
-   Acceleration operator-(const Acceleration& a) const { return Acceleration(ddx - a.ddx, ddy - a.ddy); }
-   Acceleration& operator-=(const Acceleration& a) { ddx -= a.ddx; ddy -= a.ddy; return *this; }
-   bool operator==(const Acceleration& a) const { return ddx == a.ddx && ddy == a.ddy; }
+   Acceleration operator+(const Acceleration& rhs) const
+   {
+      Acceleration aReturn(*this);
+      aReturn.add(rhs);
+      return aReturn;
+   }
+   Acceleration& operator+=(const Acceleration& a)
+   {
+      ddx += a.ddx;
+      ddy += a.ddy;
+      return *this;
+   }
+   Acceleration operator-(const Acceleration& a) const
+   {
+      return Acceleration(ddx - a.ddx, ddy - a.ddy);
+   }
+   Acceleration& operator-=(const Acceleration& a)
+   {
+      ddx -= a.ddx;
+      ddy -= a.ddy;
+      return *this;
+   }
+   bool operator==(const Acceleration& a) const
+   {
+      return ddx == a.ddx && ddy == a.ddy;
+   }
    bool operator!=(const Acceleration& a) const { return !(*this == a); }
 
 private:

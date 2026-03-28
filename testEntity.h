@@ -4,19 +4,17 @@
 #include <memory>
 
 #include "breakableEntity.h"
+#include "constants.h" // Add this include
 #include "timedEntity.h"
 #include "unitTest.h"
-#include "constants.h"  // Add this include
 
 class EntityDouble : public Entity
 {
 public:
    EntityDouble() : Entity() {}
-   EntityDouble(const Position& position,
-                const Velocity& velocity,
-                const Angle& rotation,
-                double angularVelocity)
-      : Entity(position, velocity, rotation, angularVelocity)
+   EntityDouble(const Position& position, const Velocity& velocity,
+                const Angle& rotation, double angularVelocity)
+       : Entity(position, velocity, rotation, angularVelocity)
    {
    }
 
@@ -45,7 +43,7 @@ public:
    }
 
 private:
-   static constexpr double TWO_PI = 2.0 * M_PI;  // Use M_PI from constants.h
+   static constexpr double TWO_PI = 2.0 * M_PI; // Use M_PI from constants.h
 
    void construct_default()
    {
@@ -291,7 +289,7 @@ class BreakableEntityDouble : public BreakableEntity
 public:
    BreakableEntityDouble() : BreakableEntity() {}
    BreakableEntityDouble(const Position& position, const Velocity& velocity)
-      : BreakableEntity(position, velocity)
+       : BreakableEntity(position, velocity)
    {
    }
    double getVelocityDX() const { return getVelocity().dx; }
@@ -391,8 +389,9 @@ class TimedEntityDouble : public TimedEntity
 {
 public:
    TimedEntityDouble() : TimedEntity() {}
-   TimedEntityDouble(const Position& position, const Velocity& velocity, double expireTime)
-      : TimedEntity(position, velocity, expireTime)
+   TimedEntityDouble(const Position& position, const Velocity& velocity,
+                     double expireTime)
+       : TimedEntity(position, velocity, expireTime)
    {
    }
    double getVelocityDX() const { return getVelocity().dx; }
@@ -476,8 +475,8 @@ private:
    void update_increasesAgeAndMovesEntity()
    {
       // SETUP
-      std::unique_ptr<TimedEntityDouble> entityPtr(
-         new TimedEntityDouble(Position(7000000.0, 0.0), Velocity(0.0, 7500.0), 2.0));
+      std::unique_ptr<TimedEntityDouble> entityPtr(new TimedEntityDouble(
+         Position(7000000.0, 0.0), Velocity(0.0, 7500.0), 2.0));
       TimedEntityDouble& entity = *entityPtr;
 
       // EXERCISE

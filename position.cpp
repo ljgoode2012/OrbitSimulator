@@ -10,7 +10,6 @@
 #include "position.h"
 #include <cassert>
 
-
 Position::Position(double x, double y) : x(0.0), y(0.0)
 {
    setMetersX(x);
@@ -21,7 +20,7 @@ Position::Position(double x, double y) : x(0.0), y(0.0)
  * POINT : ASSIGNMENT
  * Assign a point
  *****************************************/
-Position& Position::operator = (const Position& pt)
+Position& Position::operator=(const Position& pt)
 {
    x = pt.x;
    y = pt.y;
@@ -32,17 +31,17 @@ Position& Position::operator = (const Position& pt)
  * POSITION insertion
  *       Display coordinates on the screen
  *****************************************/
-std::ostream& operator << (std::ostream& out, const Position& pt)
+std::ostream& operator<<(std::ostream& out, const Position& pt)
 {
    out << "(" << pt.getMetersX() << "m , " << pt.getMetersY() << "m)";
    return out;
 }
-   
+
 /*******************************************
-* POSITION extraction
-*       Prompt for coordinates
-******************************************/
-std::istream& operator >> (std::istream& in, Position& pt)
+ * POSITION extraction
+ *       Prompt for coordinates
+ ******************************************/
+std::istream& operator>>(std::istream& in, Position& pt)
 {
    double x;
    double y;

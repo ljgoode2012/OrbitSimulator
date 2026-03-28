@@ -72,7 +72,8 @@ private:
    static double earthFacingRotationRadians(const Position& position)
    {
       Angle earthFacingRotation;
-      earthFacingRotation.setDxDy(-position.getMetersX(), -position.getMetersY());
+      earthFacingRotation.setDxDy(-position.getMetersX(),
+                                  -position.getMetersY());
       earthFacingRotation.addRadians(COUNTERCLOCKWISE_OFFSET_RADIANS);
       return earthFacingRotation.getRadians();
    }
@@ -85,11 +86,14 @@ private:
 
       // EXERCISE
       const double radius = computeRadius(hubble.getPosition());
-      const double speed = computeSpeed(hubble.getVelocityDX(), hubble.getVelocityDY());
+      const double speed = computeSpeed(hubble.getVelocityDX(),
+                                        hubble.getVelocityDY());
 
       // VERIFY
-      assertEqualsTolerance(radius, Hubble::ORBIT_RADIUS_METERS, 0.001);
-      assertEqualsTolerance(speed, circularOrbitSpeed(Hubble::ORBIT_RADIUS_METERS), 0.001);
+      assertEqualsTolerance(radius, HUBBLE_ORBIT_RADIUS_METERS, 0.001);
+      assertEqualsTolerance(speed,
+                            circularOrbitSpeed(HUBBLE_ORBIT_RADIUS_METERS),
+                            0.001);
 
       // TEARDOWN
       hubblePtr.reset();
@@ -103,11 +107,13 @@ private:
 
       // EXERCISE
       const double radius = computeRadius(gps.getPosition());
-      const double speed = computeSpeed(gps.getVelocityDX(), gps.getVelocityDY());
+      const double speed = computeSpeed(gps.getVelocityDX(),
+                                        gps.getVelocityDY());
 
       // VERIFY
-      assertEqualsTolerance(radius, GPS::ORBIT_RADIUS_METERS, 0.001);
-      assertEqualsTolerance(speed, circularOrbitSpeed(GPS::ORBIT_RADIUS_METERS), 0.001);
+      assertEqualsTolerance(radius, GPS_ORBIT_RADIUS_METERS, 0.001);
+      assertEqualsTolerance(speed, circularOrbitSpeed(GPS_ORBIT_RADIUS_METERS),
+                            0.001);
 
       // TEARDOWN
       gpsPtr.reset();
@@ -118,14 +124,15 @@ private:
       // SETUP
       std::unique_ptr<GPSDouble> gpsPtr(new GPSDouble(HALF_PI));
       GPSDouble& gps = *gpsPtr;
-      const double expectedSpeed = circularOrbitSpeed(GPS::ORBIT_RADIUS_METERS);
+      const double expectedSpeed = circularOrbitSpeed(GPS_ORBIT_RADIUS_METERS);
 
       // EXERCISE
       const Position& position = gps.getPosition();
 
       // VERIFY
       assertEqualsTolerance(position.getMetersX(), 0.0, 0.001);
-      assertEqualsTolerance(position.getMetersY(), GPS::ORBIT_RADIUS_METERS, 0.001);
+      assertEqualsTolerance(position.getMetersY(), GPS_ORBIT_RADIUS_METERS,
+                            0.001);
       assertEqualsTolerance(gps.getVelocityDX(), -expectedSpeed, 0.001);
       assertEqualsTolerance(gps.getVelocityDY(), 0.0, 0.001);
 
@@ -140,10 +147,10 @@ private:
       // EXERCISE
 
       // VERIFY
-      assertUnit(Sputnik::ORBIT_RADIUS_METERS > GPS::ORBIT_RADIUS_METERS);
-      assertUnit(Sputnik::ORBIT_RADIUS_METERS > Hubble::ORBIT_RADIUS_METERS);
-      assertUnit(Sputnik::ORBIT_RADIUS_METERS > Starlink::ORBIT_RADIUS_METERS);
-      assertUnit(Sputnik::ORBIT_RADIUS_METERS > CrewDragon::ORBIT_RADIUS_METERS);
+      assertUnit(SPUTNIK_ORBIT_RADIUS_METERS > GPS_ORBIT_RADIUS_METERS);
+      assertUnit(SPUTNIK_ORBIT_RADIUS_METERS > HUBBLE_ORBIT_RADIUS_METERS);
+      assertUnit(SPUTNIK_ORBIT_RADIUS_METERS > STARLINK_ORBIT_RADIUS_METERS);
+      assertUnit(SPUTNIK_ORBIT_RADIUS_METERS > CREW_DRAGON_ORBIT_RADIUS_METERS);
 
       // TEARDOWN
    }
@@ -160,21 +167,21 @@ private:
       // EXERCISE
 
       // VERIFY
-      assertEqualsTolerance(hubblePtr->getRotation(),
-                            earthFacingRotationRadians(hubblePtr->getPosition()),
-                            0.0001);
-      assertEqualsTolerance(starlinkPtr->getRotation(),
-                            earthFacingRotationRadians(starlinkPtr->getPosition()),
-                            0.0001);
-      assertEqualsTolerance(crewDragonPtr->getRotation(),
-                            earthFacingRotationRadians(crewDragonPtr->getPosition()),
-                            0.0001);
+      assertEqualsTolerance(
+         hubblePtr->getRotation(),
+         earthFacingRotationRadians(hubblePtr->getPosition()), 0.0001);
+      assertEqualsTolerance(
+         starlinkPtr->getRotation(),
+         earthFacingRotationRadians(starlinkPtr->getPosition()), 0.0001);
+      assertEqualsTolerance(
+         crewDragonPtr->getRotation(),
+         earthFacingRotationRadians(crewDragonPtr->getPosition()), 0.0001);
       assertEqualsTolerance(gpsPtr->getRotation(),
                             earthFacingRotationRadians(gpsPtr->getPosition()),
                             0.0001);
-      assertEqualsTolerance(sputnikPtr->getRotation(),
-                            earthFacingRotationRadians(sputnikPtr->getPosition()),
-                            0.0001);
+      assertEqualsTolerance(
+         sputnikPtr->getRotation(),
+         earthFacingRotationRadians(sputnikPtr->getPosition()), 0.0001);
 
       // TEARDOWN
       hubblePtr.reset();
@@ -226,19 +233,25 @@ private:
    void satellite_update_notDefunctFacesEarth()
    {
       // SETUP
-      std::unique_ptr<SatelliteDouble> satellitePtr(new SatelliteDouble);
-      SatelliteDouble& satellite = *satellitePtr;
+      std::unique_ptr<Satellite> satellitePtr(new Satellite);
+      Satellite& satellite = *satellitePtr;
       satellite.setIsDefunct(false);
-      satellite.setPosition(Position(7000000.0, 0.0));
-      satellite.setVelocity(Velocity(0.0, 0.0));
-      satellite.setRotationRadians(0.0);
+
+      // Set a non-zero position so the satellite can compute earth-facing
+      // rotation
+      Position testPosition;
+      testPosition.setMeters(1000000.0, 2000000.0); // Some non-zero position
+      satellite.setPosition(testPosition);
+
+      const double dt = 48.0;
 
       // EXERCISE
-      satellite.update(0.0);
+      satellite.update(dt);
 
       // VERIFY
-      const double expectedRotation = earthFacingRotationRadians(satellite.getPosition());
-      assertEqualsTolerance(satellite.getRotation(), expectedRotation, 0.0001);
+      assertEqualsTolerance(satellite.getRotation(),
+                            earthFacingRotationRadians(satellite.getPosition()),
+                            0.0001);
 
       // TEARDOWN
       satellitePtr.reset();
@@ -247,19 +260,19 @@ private:
    void satellite_update_defunctUsesAngularVelocity()
    {
       // SETUP
-      std::unique_ptr<SatelliteDouble> satellitePtr(new SatelliteDouble);
-      SatelliteDouble& satellite = *satellitePtr;
+      std::unique_ptr<Satellite> satellitePtr(new Satellite);
+      Satellite& satellite = *satellitePtr;
       satellite.setIsDefunct(true);
-      satellite.setPosition(Position(7000000.0, 0.0));
-      satellite.setVelocity(Velocity(0.0, 0.0));
-      satellite.setRotationRadians(0.0);
-      satellite.setAngularVelocity(0.5);
+      const double dt = 48.0;
+      const double initialRotation = satellite.getRotation();
+      const double angularVelocity = satellite.getAngularVelocity();
+      const double expectedRotation = initialRotation + angularVelocity * dt;
 
       // EXERCISE
-      satellite.update(2.0);
+      satellite.update(dt);
 
       // VERIFY
-      assertEqualsTolerance(satellite.getRotation(), 1.0, 0.0001);
+      assertEqualsTolerance(satellite.getRotation(), expectedRotation, 0.0001);
 
       // TEARDOWN
       satellitePtr.reset();

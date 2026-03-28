@@ -7,7 +7,6 @@
  *    All the unit tests for Position
  ************************************************************************/
 
-
 #pragma once
 
 #include "position.h"
@@ -27,20 +26,19 @@ public:
       construct_nonDefault();
       construct_copy();
       assign();
- 
+
       // Setters
       setMetersX();
       setMetersY();
-      
+
       // Getters
       getMetersX();
       getMetersY();
 
       report("Position");
    }
-   
-private:
 
+private:
    /*********************************************
     * name:    DEFAULT CONSTRUCTOR
     * input:   nothing
@@ -139,7 +137,7 @@ private:
       // TEARDOWN
       Position::metersFromPixels = metersFromPixels;
    }
-   
+
    /*********************************************
     * name:    GET METERS X
     * input:   pos=(4500.0, 2500.0)
@@ -194,7 +192,7 @@ private:
     * output:  pos=(123.4, 888.8)
     *********************************************/
    void setMetersX()
-   {  // SETUP
+   { // SETUP
       double metersFromPixels = Position::metersFromPixels;
       Position::metersFromPixels = 99.9;
       Position pos;
@@ -216,7 +214,7 @@ private:
     * output:  pos=(999.9, 123.4)
     *********************************************/
    void setMetersY()
-   {  // SETUP
+   { // SETUP
       double metersFromPixels = Position::metersFromPixels;
       Position::metersFromPixels = 99.9;
       Position pos;
@@ -231,5 +229,4 @@ private:
       // TEARDOWN
       Position::metersFromPixels = metersFromPixels;
    }
-
 };

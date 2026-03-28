@@ -8,17 +8,19 @@
  ************************************************************************/
 
 #include "test.h"
-#include "testEntity.h"
-#include "testPosition.h"
-#include "testVelocity.h"
 #include "testAcceleration.h"
 #include "testAngle.h"
+#include "testEntity.h"
+#include "testPosition.h"
 #include "testSatellite.h"
 #include "testShip.h"
+#include "testVelocity.h"
+#include "testFragment.h"
+#include "testProjectile.h"
 
 #ifdef _WIN32
-#include <windows.h>
 #include <iostream>
+#include <windows.h>
 using namespace std;
 #endif
 
@@ -44,4 +46,6 @@ void testRunner()
    TestSatellite().run();
    TestShip().run();
    TestTimedEntity().run();
+   TestFragment().run();
+   TestProjectile().run();
 }

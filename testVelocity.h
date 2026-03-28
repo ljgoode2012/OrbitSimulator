@@ -9,12 +9,11 @@
 
 #pragma once
 
+#include "acceleration.h"
+#include "angle.h"
+#include "constants.h"
 #include "unitTest.h"
 #include "velocity.h"
-#include "constants.h"
-#include "angle.h"
-#include "acceleration.h"
-
 
 /*********************************************
  * TEST VELOCITY

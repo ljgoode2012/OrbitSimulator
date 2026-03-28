@@ -1,14 +1,25 @@
+/***********************************************************************
+ * Header File:
+ *    Velocity : The representation of velocity
+ * Author:
+ *    Lindsey Goode, Porter Williams
+ * Summary:
+ *    Everything we need to know about velocity
+ ************************************************************************/
+
 #pragma once
 #include "acceleration.h"
 #include "angle.h"
 #include <cmath>
 
-class TestVelocity;
-
+/*********************************************
+ * Velocity
+ * A velocity represents the rate of change
+ * of position in the x and y directions
+ *********************************************/
 class Velocity
 {
 public:
-   friend class TestVelocity;
    // Members
    double dx;
    double dy;
@@ -72,14 +83,8 @@ public:
       dy -= v.dy;
       return *this;
    }
-   bool operator==(const Velocity& v) const
-   {
-      return dx == v.dx && dy == v.dy;
-   }
-   bool operator!=(const Velocity& v) const
-   {
-      return !(*this == v);
-   }
+   bool operator==(const Velocity& v) const { return dx == v.dx && dy == v.dy; }
+   bool operator!=(const Velocity& v) const { return !(*this == v); }
    void update(const Acceleration& acceleration, double dt)
    {
       dx += acceleration.getDDX() * dt;

@@ -8,9 +8,9 @@
  ************************************************************************/
 #pragma once
 
-#include "unitTest.h"
 #include "acceleration.h"
 #include "angle.h"
+#include "unitTest.h"
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -31,7 +31,7 @@ public:
       getDDX();
       getDDY();
 
-      //setters
+      // setters
       setDDX();
       setDDY();
       set_up();

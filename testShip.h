@@ -54,7 +54,7 @@ private:
       // SETUP
       std::unique_ptr<ShipDouble> shipPtr(new ShipDouble);
       ShipDouble& ship = *shipPtr;
-      const double expected = TWO_PI - Ship::TURN_ANGLE_RADIANS;
+      const double expected = TWO_PI - SHIP_TURN_ANGLE_RADIANS;
 
       // EXERCISE
       ship.turnLeft();
@@ -71,7 +71,7 @@ private:
       // SETUP
       std::unique_ptr<ShipDouble> shipPtr(new ShipDouble);
       ShipDouble& ship = *shipPtr;
-      const double expected = Ship::TURN_ANGLE_RADIANS;
+      const double expected = SHIP_TURN_ANGLE_RADIANS;
 
       // EXERCISE
       ship.turnRight();
@@ -89,7 +89,8 @@ private:
       std::unique_ptr<ShipDouble> shipPtr(new ShipDouble);
       ShipDouble& ship = *shipPtr;
       const double dt = 48.0;
-      const double expectedDeltaV = Ship::THRUST_ACCELERATION_METERS_PER_SECOND_SQUARED * dt;
+      const double expectedDeltaV =
+         SHIP_THRUST_ACCELERATION_METERS_PER_SECOND_SQUARED * dt;
 
       // EXERCISE
       ship.thrustForward(dt);
@@ -109,7 +110,8 @@ private:
       ShipDouble& ship = *shipPtr;
       ship.setRotationRadians(HALF_PI);
       const double dt = 48.0;
-      const double expectedDeltaV = Ship::THRUST_ACCELERATION_METERS_PER_SECOND_SQUARED * dt;
+      const double expectedDeltaV =
+         SHIP_THRUST_ACCELERATION_METERS_PER_SECOND_SQUARED * dt;
 
       // EXERCISE
       ship.thrustForward(dt);
@@ -122,7 +124,6 @@ private:
       shipPtr.reset();
    }
 
-
    void update_movesShipFromVelocity()
    {
       // SETUP
@@ -130,7 +131,7 @@ private:
       ShipDouble& ship = *shipPtr;
       ship.thrustForward(48.0);
       const double expectedVelocity =
-         Ship::THRUST_ACCELERATION_METERS_PER_SECOND_SQUARED * 48.0;
+         SHIP_THRUST_ACCELERATION_METERS_PER_SECOND_SQUARED * 48.0;
       const double dt = 3.0;
 
       // EXERCISE
@@ -138,7 +139,8 @@ private:
 
       // VERIFY
       assertEqualsTolerance(ship.getVelocityDY(), expectedVelocity, 0.0001);
-      assertEqualsTolerance(ship.getPosition().getMetersY(), expectedVelocity * dt, 0.0001);
+      assertEqualsTolerance(ship.getPosition().getMetersY(),
+                            expectedVelocity * dt, 0.0001);
 
       // TEARDOWN
       shipPtr.reset();

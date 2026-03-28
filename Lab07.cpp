@@ -6,27 +6,28 @@
  * 3. Assignment Description:
  *      Simulate satellites orbiting the earth
  * 4. What was the hardest part? Be as specific as possible.
- *      I decided to be pedantic and go with Earth's gravitational constant, which led to a lot of math, so implementing that was tricky.
- *      Getting the stars to twinkle independently was tricky too, but I'm pretty pround of my solution.
+ *      I decided to be pedantic and go with Earth's gravitational constant,
+ *which led to a lot of math, so implementing that was tricky. Getting the stars
+ *to twinkle independently was tricky too, but I'm pretty pround of my solution.
  * 5. How long did it take for you to complete the assignment?
  *      12 hours between the two of us.
  *****************************************************************/
 
-#include <cassert>      // for ASSERT
-#include <algorithm>
-#include <cmath>        // for sqrt()
-#include <memory>
-#include <vector>
-#include <utility>
 #include "constants.h"
+#include <algorithm>
+#include <cassert> // for ASSERT
+#include <cmath>   // for sqrt()
+#include <memory>
+#include <utility>
+#include <vector>
 
-#include "uiInteract.h" // for INTERFACE
-#include "uiDraw.h"     // for RANDOM and DRAW*
-#include "position.h"      // for POINT
-#include "test.h"
-#include "satellite.h"  // for Sattelite
-#include "ship.h"
+#include "position.h" // for POINT
 #include "projectile.h"
+#include "satellite.h" // for Sattelite
+#include "ship.h"
+#include "test.h"
+#include "uiDraw.h"     // for RANDOM and DRAW*
+#include "uiInteract.h" // for INTERFACE
 #include "velocity.h"   // for Velocity
 using namespace std;
 namespace
@@ -41,9 +42,11 @@ namespace
 
       const double xMeters = entity.getPosition().getMetersX();
       const double yMeters = entity.getPosition().getMetersY();
-      const double distanceMeters = std::sqrt(xMeters * xMeters + yMeters * yMeters);
-      const double collisionRadiusMeters =
-         (EARTH_COLLISION_RADIUS_PIXELS + entityRadiusPixels) * entity.getPosition().getZoom();
+      const double distanceMeters = std::sqrt(xMeters * xMeters +
+                                              yMeters * yMeters);
+      const double collisionRadiusMeters = (EARTH_COLLISION_RADIUS_PIXELS +
+                                            entityRadiusPixels) *
+                                           entity.getPosition().getZoom();
       return distanceMeters <= collisionRadiusMeters;
    }
    bool isCollisionImmune(const Entity& entity)
@@ -64,13 +67,15 @@ namespace
       if (lhsRadiusPixels <= 0.0 || rhsRadiusPixels <= 0.0)
          return false;
 
-      const double collisionRadiusMeters =
-         (lhsRadiusPixels + rhsRadiusPixels) * lhs.getPosition().getZoom();
-      const double distanceMeters = computeDistance(lhs.getPosition(), rhs.getPosition());
+      const double collisionRadiusMeters = (lhsRadiusPixels + rhsRadiusPixels) *
+                                           lhs.getPosition().getZoom();
+      const double distanceMeters = computeDistance(lhs.getPosition(),
+                                                    rhs.getPosition());
       return distanceMeters <= collisionRadiusMeters;
    }
 
-   void breakEntity(const Entity& entity, std::vector<std::unique_ptr<Entity>>& spawnedDebris)
+   void breakEntity(const Entity& entity,
+                    std::vector<std::unique_ptr<Entity>>& spawnedDebris)
    {
       const Satellite* satellite = dynamic_cast<const Satellite*>(&entity);
       if (satellite != nullptr)
@@ -80,23 +85,24 @@ namespace
       }
 
       const SatellitePart* part = dynamic_cast<const SatellitePart*>(&entity);
-      if (part != nullptr && part->getFragmentsOnBreak() > 0)
-         createFragmentsFromEntity(entity, part->getFragmentsOnBreak(), spawnedDebris);
+      if (part != nullptr)
+      {
+         part->createBreakupDebris(spawnedDebris);
+         return;
+      }
    }
 
    bool shouldRemoveEntity(const std::unique_ptr<Entity>& entity)
    {
-      const Projectile* projectile = dynamic_cast<const Projectile*>(entity.get());
+      const Projectile* projectile = dynamic_cast<const Projectile*>(
+         entity.get());
       if (projectile != nullptr && projectile->isExpired())
          return true;
 
       const Fragment* fragment = dynamic_cast<const Fragment*>(entity.get());
       return fragment != nullptr && fragment->isExpired();
    }
-}
-
-
-
+} // namespace
 
 /*************************************************************************
  * Demo
@@ -105,11 +111,9 @@ namespace
 class Demo
 {
 public:
-
    Demo(const Position& ptUpperRight)
        : ptUpperRight(ptUpperRight), angleEarth(0.0), ship(nullptr)
    {
-
       constexpr double TWO_PI = 6.28318530717958647692;
       constexpr int GPS_SATELLITE_COUNT = 10;
 
@@ -120,14 +124,16 @@ public:
 
       for (int i = 0; i < GPS_SATELLITE_COUNT; ++i)
       {
-         const double theta = (TWO_PI * static_cast<double>(i)) / GPS_SATELLITE_COUNT;
+         const double theta = (TWO_PI * static_cast<double>(i)) /
+                              GPS_SATELLITE_COUNT;
          entities.push_back(std::unique_ptr<Entity>(new GPS(theta)));
       }
 
       Position shipPosition;
       shipPosition.setPixelsX(-450.0);
       shipPosition.setPixelsY(450.0);
-      Ship* managedShip = new Ship(shipPosition, Velocity(0.0, -2000.0), Angle(0.0));
+      Ship* managedShip = new Ship(shipPosition, Velocity(0.0, -2000.0),
+                                   Angle(0.0));
       ship = managedShip;
       entities.push_back(std::unique_ptr<Entity>(managedShip));
 
@@ -146,12 +152,12 @@ public:
          star.phase = static_cast<unsigned char>(random(0, 255));
 
          // Random twinkle speed
-         // I tried a couple different ranges, 1-4 did best, I think it looks beautiful at this speed!
+         // I tried a couple different ranges, 1-4 did best, I think it looks
+         // beautiful at this speed!
          star.speed = static_cast<unsigned char>(random(1, 4));
 
          stars.push_back(star);
       }
-
    }
    Position ptUpperRight;
    double angleEarth;
@@ -160,11 +166,14 @@ public:
    struct Star
    {
       Position position;
-      unsigned char phase; // char allows 0–255, giving 255 phases the star could be in.
-      unsigned char speed; // likewise, the twinkle speed can be any of 255 values, allowing for a lot of variation.
+      unsigned char
+         phase; // char allows 0–255, giving 255 phases the star could be in.
+      unsigned char speed; // likewise, the twinkle speed can be any of 255
+                           // values, allowing for a lot of variation.
       // I'm not using all of them at the moment though.
-      // char is also just a small data type that won't take up much space, which is good,
-      // because there will be a lot of stars, and they're already slowing down the simulation a little.
+      // char is also just a small data type that won't take up much space,
+      // which is good, because there will be a lot of stars, and they're
+      // already slowing down the simulation a little.
    };
    vector<Star> stars;
 };
@@ -179,12 +188,11 @@ public:
 void callBack(const Interface* pUI, void* p)
 {
    // the first step is to cast the void pointer into a game object. This
-   // is the first step of every single callback function in OpenGL. 
+   // is the first step of every single callback function in OpenGL.
    Demo* pDemo = (Demo*)p;
 
    //
    // accept input
-   
 
    if (pDemo->ship != nullptr)
    {
@@ -199,10 +207,10 @@ void callBack(const Interface* pUI, void* p)
          pDemo->ship->thrustForward(SIM_SECONDS_PER_FRAME);
       if (pUI->isSpace())
       {
-         pDemo->entities.push_back(std::unique_ptr<Entity>(new Projectile(Projectile::createFromShip(*pDemo->ship))));
+         pDemo->entities.push_back(std::unique_ptr<Entity>(
+            new Projectile(Projectile::createFromShip(*pDemo->ship))));
       }
    }
-
 
    //
    // perform all the game logic
@@ -265,7 +273,8 @@ void callBack(const Interface* pUI, void* p)
    survivors.reserve(pDemo->entities.size());
    for (size_t i = 0; i < pDemo->entities.size(); ++i)
    {
-      if (pDemo->entities[i].get() == pDemo->ship && (removeEntity[i] || shouldRemoveEntity(pDemo->entities[i])))
+      if (pDemo->entities[i].get() == pDemo->ship &&
+          (removeEntity[i] || shouldRemoveEntity(pDemo->entities[i])))
          pDemo->ship = nullptr;
       if (!removeEntity[i] && !shouldRemoveEntity(pDemo->entities[i]))
          survivors.push_back(std::move(pDemo->entities[i]));
@@ -286,7 +295,6 @@ void callBack(const Interface* pUI, void* p)
    for (const auto& entity : pDemo->entities)
       entity->draw(gout);
 
-
    // draw stars
    for (const auto& star : pDemo->stars)
    {
@@ -305,16 +313,12 @@ double Position::metersFromPixels = 40.0;
  *********************************/
 #ifdef _WIN32_X
 #include <windows.h>
-int WINAPI wWinMain(
-   _In_ HINSTANCE hInstance,
-   _In_opt_ HINSTANCE hPrevInstance,
-   _In_ PWSTR pCmdLine,
-   _In_ int nCmdShow)
-#else // !_WIN32
+int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
+                    _In_ PWSTR pCmdLine, _In_ int nCmdShow)
+#else  // !_WIN32
 int main(int argc, char** argv)
 #endif // !_WIN32
 {
-
    testRunner();
 
    // Initialize OpenGL
@@ -322,16 +326,14 @@ int main(int argc, char** argv)
    ptUpperRight.setZoom(128000.0 /* 128km equals 1 pixel */);
    ptUpperRight.setPixelsX(1000.0);
    ptUpperRight.setPixelsY(1000.0);
-   Interface ui(0, NULL,
-      "Demo",   /* name on the window */
-      ptUpperRight);
+   Interface ui(0, NULL, "Demo", /* name on the window */
+                ptUpperRight);
 
    // Initialize the demo
    Demo demo(ptUpperRight);
 
    // set everything into action
    ui.run(callBack, &demo);
-
 
    return 0;
 }

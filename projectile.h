@@ -1,19 +1,29 @@
+/***********************************************************************
+ * Header File:
+ *    Projectile : A bullet fired from the ship
+ * Author:
+ *    Lindsey Goode, Porter Williams
+ * Summary:
+ *    A projectile fired by the Dream Chaser to destroy debris
+ ************************************************************************/
 #pragma once
 
+#include "constants.h"
 #include "entity.h"
 #include "uiDraw.h"
 
 class Ship;
 
+/*********************************************
+ * Projectile
+ * A bullet fired from the ship that
+ * expires after a set time
+ *********************************************/
 class Projectile : public Entity
 {
 public:
-   static constexpr double SPEED_BOOST_METERS_PER_SECOND = 9000.0;
-   static constexpr double SPAWN_OFFSET_PIXELS = 19.0;
-   static constexpr int LIFETIME_GAME_UNITS = 70;
-
    Projectile(const Position& position, const Velocity& velocity)
-      : Entity(position, velocity), ageGameUnits(0)
+       : Entity(position, velocity), ageGameUnits(0)
    {
    }
 
@@ -32,12 +42,12 @@ public:
 
    double getCollisionRadiusPixels() const override
    {
-      return 1.0;
+      return PROJECTILE_COLLISION_RADIUS_PIXELS;
    }
 
    bool isExpired() const
    {
-      return ageGameUnits >= LIFETIME_GAME_UNITS;
+      return ageGameUnits >= PROJECTILE_LIFETIME_GAME_UNITS;
    }
 
 private:

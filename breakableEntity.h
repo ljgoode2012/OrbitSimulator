@@ -1,7 +1,23 @@
+/***********************************************************************
+ * Header File:
+ *    BreakableEntity : An entity that can be destroyed
+ * Author:
+ *    Lindsey Goode, Porter Williams
+ * Summary:
+ *    An entity that can be hit and create debris when destroyed
+ ************************************************************************/
+
 #pragma once
 
 #include "entity.h"
+#include <memory>
+#include <vector>
 
+/*********************************************
+ * BreakableEntity
+ * An entity that can be destroyed and
+ * create debris when hit
+ *********************************************/
 class BreakableEntity : public Entity
 {
 public:
@@ -18,6 +34,13 @@ public:
 
    // getters
    bool getIsHit() const { return isHit; }
+
+   // Inline default implementation - derived classes can override
+   virtual void createBreakupDebris(
+      std::vector<std::unique_ptr<Entity>>& debris) const
+   {
+      (void)debris;
+   }
 
 private:
    bool isHit;

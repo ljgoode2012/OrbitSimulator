@@ -78,6 +78,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(ShortProjectName)\$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -165,7 +166,9 @@
     <ClInclude Include="testAcceleration.h" />
     <ClInclude Include="testAngle.h" />
     <ClInclude Include="testEntity.h" />
+    <ClInclude Include="testFragment.h" />
     <ClInclude Include="testPosition.h" />
+    <ClInclude Include="testProjectile.h" />
     <ClInclude Include="testSatellite.h" />
     <ClInclude Include="testShip.h" />
     <ClInclude Include="testVelocity.h" />

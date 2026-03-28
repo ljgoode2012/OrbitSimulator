@@ -18,8 +18,8 @@
 
 #include "position.h"
 #include <algorithm> // used for min() and max() (specifically required by Visual Studio)
-using std::min;
 using std::max;
+using std::min;
 
 #define GL_SILENCE_DEPRECATION
 
@@ -35,16 +35,17 @@ public:
 
    // Constructor if you want to set up the window with anything but
    // the default parameters
-   Interface(int argc, char ** argv, const char * title, const Position & ptUpperRight)
+   Interface(int argc, char** argv, const char* title,
+             const Position& ptUpperRight)
    {
       initialize(argc, argv, title, ptUpperRight);
    }
-   
+
    // Destructor, in case any housecleaning needs to occur
    ~Interface();
 
    // This will set the game in motion
-   void run(void (*callBack)(const Interface *, void *), void *p);
+   void run(void (*callBack)(const Interface*, void*), void* p);
 
    // Is it time to redraw the screen
    bool isTimeToDraw();
@@ -57,40 +58,39 @@ public:
 
    // How many frames per second are we configured for?
    void setFramesPerSecond(double value);
-   
+
    // Key event indicating a key has been pressed or not.  The callbacks
    // should be the only onces to call this
    void keyEvent(int key, bool fDown);
    void keyEvent();
 
    // Current frame rate
-   double frameRate() const { return timePeriod;   }
-   
+   double frameRate() const { return timePeriod; }
+
    // Get various key events
-   int  isDown()      const { return isDownPress;  }
-   int  isUp()        const { return isUpPress;    }
-   int  isLeft()      const { return isLeftPress;  }
-   int  isRight()     const { return isRightPress; }
-   bool isSpace()     const { return isSpacePress; }
-   
-   static void *p;                   // for client
-   static void (*callBack)(const Interface *, void *);
+   int isDown() const { return isDownPress; }
+   int isUp() const { return isUpPress; }
+   int isLeft() const { return isLeftPress; }
+   int isRight() const { return isRightPress; }
+   bool isSpace() const { return isSpacePress; }
+
+   static void* p; // for client
+   static void (*callBack)(const Interface*, void*);
 
 private:
-   void initialize(int argc, char ** argv, const char * title, const Position & ptUpperRight);
+   void initialize(int argc, char** argv, const char* title,
+                   const Position& ptUpperRight);
 
-   static bool         initialized;  // only run the constructor once!
-   static double       timePeriod;   // interval between frame draws
-   static unsigned long nextTick;     // time (from clock()) of our next draw
+   static bool initialized;       // only run the constructor once!
+   static double timePeriod;      // interval between frame draws
+   static unsigned long nextTick; // time (from clock()) of our next draw
 
-   static int  isDownPress;          // is the down arrow currently pressed?
-   static int  isUpPress;            //    "   up         "
-   static int  isLeftPress;          //    "   left       "
-   static int  isRightPress;         //    "   right      "
-   static bool isSpacePress;         //    "   space      "
+   static int isDownPress;   // is the down arrow currently pressed?
+   static int isUpPress;     //    "   up         "
+   static int isLeftPress;   //    "   left       "
+   static int isRightPress;  //    "   right      "
+   static bool isSpacePress; //    "   space      "
 };
-
-
 
 /************************************************************************
  * DRAW CALLBACK
