@@ -16,6 +16,10 @@
 
 namespace
 {
+   /******************************************
+    * Compute Earth Facing Rotation
+    * Calculate the rotation angle needed to face Earth
+    *****************************************/
    Angle computeEarthFacingRotation(const Position& position)
    {
       Angle earthFacingRotation;
@@ -25,6 +29,10 @@ namespace
       return earthFacingRotation;
    }
 
+   /******************************************
+    * Random Double
+    * Generate a random double between min and max
+    *****************************************/
    double randomDouble(double min, double max)
    {
       return min + (static_cast<double>(std::rand()) /
@@ -32,6 +40,10 @@ namespace
                       (max - min);
    }
 
+   /******************************************
+    * Create Debris Velocity
+    * Generate a random velocity for debris based on parent entity
+    *****************************************/
    Velocity createDebrisVelocity(const Entity& parent)
    {
       const double directionRadians = randomDouble(0.0, 2.0 * M_PI);
@@ -43,6 +55,10 @@ namespace
          parent.getVelocityDY() + std::cos(directionRadians) * kick);
    }
 
+   /******************************************
+    * Create Debris Position
+    * Calculate spawn position for debris offset from parent
+    *****************************************/
    Position createDebrisPosition(const Entity& parent,
                                  const Velocity& debrisVelocity)
    {
@@ -54,6 +70,10 @@ namespace
       return spawnPosition;
    }
 
+   /******************************************
+    * Create Fragment Expire Time Seconds
+    * Generate a random lifetime for a fragment
+    *****************************************/
    double createFragmentExpireTimeSeconds()
    {
       const double frames = randomDouble(FRAGMENT_MIN_LIFETIME_FRAMES,
@@ -61,11 +81,19 @@ namespace
       return frames * SIM_SECONDS_PER_FRAME;
    }
 
+   /******************************************
+    * Create Random Rotation
+    * Generate a random rotation angle
+    *****************************************/
    Angle createRandomRotation()
    {
       return Angle(randomDouble(0.0, 2.0 * M_PI));
    }
 
+   /******************************************
+    * Create Fragment Spin Rate
+    * Generate a random spin rate with random direction
+    *****************************************/
    double createFragmentSpinRate()
    {
       const double magnitude = randomDouble(
@@ -74,6 +102,10 @@ namespace
       return (std::rand() % 2 == 0) ? magnitude : -magnitude;
    }
 
+   /******************************************
+    * Add Part From Entity
+    * Create a satellite part from parent entity and add to debris list
+    *****************************************/
    void addPartFromEntity(const Entity& parent,
                           SatellitePart::DrawType drawType, double radiusPixels,
                           int fragmentsOnBreak,
@@ -89,12 +121,17 @@ namespace
    }
 } // namespace
 
+/******************************************
+ * SatellitePart : Update
+ * Update the satellite part and handle collision immunity
+ *****************************************/
 void SatellitePart::update(double dt)
 {
    Entity::update(dt);
    if (collisionImmunityFrames > 0)
       --collisionImmunityFrames;
 }
+
 /******************************************
  * Satellite : Draw
  * Draw a generic satellite; concrete types should override this.
@@ -104,16 +141,29 @@ void Satellite::draw(ogstream& gout) const
    (void)gout;
 }
 
+/******************************************
+ * Satellite : Create Breakup Debris
+ * Generate debris when satellite breaks up (base implementation)
+ *****************************************/
 void Satellite::createBreakupDebris(
    std::vector<std::unique_ptr<Entity>>& debris) const
 {
    (void)debris;
 }
 
+/******************************************
+ * Fragment : Draw
+ * Draw a fragment
+ *****************************************/
 void Fragment::draw(ogstream& gout) const
 {
    gout.drawFragment(getPosition(), getRotation());
 }
+
+/******************************************
+ * Fragment : Update
+ * Update the fragment and handle collision immunity
+ *****************************************/
 void Fragment::update(double dt)
 {
    TimedEntity::update(dt);
@@ -121,6 +171,10 @@ void Fragment::update(double dt)
       --collisionImmunityFrames;
 }
 
+/******************************************
+ * SatellitePart : Constructor
+ * Initialize a satellite part with position, velocity, and visual properties
+ *****************************************/
 SatellitePart::SatellitePart(const Position& pos, const Velocity& vel,
                              const Angle& rotation, DrawType drawType,
                              double radiusPixels, int fragmentsOnBreak)
@@ -131,6 +185,10 @@ SatellitePart::SatellitePart(const Position& pos, const Velocity& vel,
    setRotation(rotation);
 }
 
+/******************************************
+ * SatellitePart : Draw
+ * Draw the appropriate satellite part based on type
+ *****************************************/
 void SatellitePart::draw(ogstream& gout) const
 {
    switch (drawType)
@@ -176,6 +234,10 @@ void SatellitePart::draw(ogstream& gout) const
    }
 }
 
+/******************************************
+ * Satellite : Set Is Defunct
+ * Mark satellite as defunct and set random spin or stop spinning
+ *****************************************/
 void Satellite::setIsDefunct(bool isDefunct)
 {
    this->isDefunct = isDefunct;
@@ -224,9 +286,8 @@ void Satellite::initializeCircularOrbit(double orbitalRadiusMeters,
 
 /******************************************
  * Satellite : Update
- * Update the satellite's position
+ * Update the satellite's position and rotation
  *****************************************/
-
 void Satellite::update(double dt)
 {
    Entity::update(dt);
@@ -242,31 +303,55 @@ void Satellite::update(double dt)
    }
 }
 
+/******************************************
+ * Hubble : Draw
+ * Draw the Hubble telescope
+ *****************************************/
 void Hubble::draw(ogstream& gout) const
 {
    gout.drawHubble(getPosition(), getRotation());
 }
 
+/******************************************
+ * Starlink : Draw
+ * Draw the Starlink satellite
+ *****************************************/
 void Starlink::draw(ogstream& gout) const
 {
    gout.drawStarlink(getPosition(), getRotation());
 }
 
+/******************************************
+ * CrewDragon : Draw
+ * Draw the Crew Dragon spacecraft
+ *****************************************/
 void CrewDragon::draw(ogstream& gout) const
 {
    gout.drawCrewDragon(getPosition(), getRotation());
 }
 
+/******************************************
+ * GPS : Draw
+ * Draw the GPS satellite
+ *****************************************/
 void GPS::draw(ogstream& gout) const
 {
    gout.drawGPS(getPosition(), getRotation());
 }
 
+/******************************************
+ * Sputnik : Draw
+ * Draw the Sputnik satellite
+ *****************************************/
 void Sputnik::draw(ogstream& gout) const
 {
    gout.drawSputnik(getPosition(), getRotation());
 }
 
+/******************************************
+ * Create Fragments From Entity
+ * Generate multiple fragments from a parent entity
+ *****************************************/
 void createFragmentsFromEntity(const Entity& parent, int fragmentCount,
                                std::vector<std::unique_ptr<Entity>>& debrisOut)
 {
@@ -283,6 +368,10 @@ void createFragmentsFromEntity(const Entity& parent, int fragmentCount,
    }
 }
 
+/******************************************
+ * Hubble : Create Breakup Debris
+ * Generate debris when Hubble breaks up
+ *****************************************/
 void Hubble::createBreakupDebris(
    std::vector<std::unique_ptr<Entity>>& debris) const
 {
@@ -299,6 +388,10 @@ void Hubble::createBreakupDebris(
                      debris);
 }
 
+/******************************************
+ * Starlink : Create Breakup Debris
+ * Generate debris when Starlink breaks up
+ *****************************************/
 void Starlink::createBreakupDebris(
    std::vector<std::unique_ptr<Entity>>& debris) const
 {
@@ -311,6 +404,10 @@ void Starlink::createBreakupDebris(
    createFragmentsFromEntity(*this, STARLINK_EXTRA_FRAGMENTS, debris);
 }
 
+/******************************************
+ * CrewDragon : Create Breakup Debris
+ * Generate debris when Crew Dragon breaks up
+ *****************************************/
 void CrewDragon::createBreakupDebris(
    std::vector<std::unique_ptr<Entity>>& debris) const
 {
@@ -326,6 +423,10 @@ void CrewDragon::createBreakupDebris(
    createFragmentsFromEntity(*this, CREW_DRAGON_EXTRA_FRAGMENTS, debris);
 }
 
+/******************************************
+ * GPS : Create Breakup Debris
+ * Generate debris when GPS breaks up
+ *****************************************/
 void GPS::createBreakupDebris(
    std::vector<std::unique_ptr<Entity>>& debris) const
 {
@@ -338,12 +439,20 @@ void GPS::createBreakupDebris(
    createFragmentsFromEntity(*this, GPS_EXTRA_FRAGMENTS, debris);
 }
 
+/******************************************
+ * Sputnik : Create Breakup Debris
+ * Generate debris when Sputnik breaks up
+ *****************************************/
 void Sputnik::createBreakupDebris(
    std::vector<std::unique_ptr<Entity>>& debris) const
 {
    createFragmentsFromEntity(*this, SPUTNIK_FRAGMENTS, debris);
 }
 
+/******************************************
+ * SatellitePart : Create Breakup Debris
+ * Generate debris when a satellite part breaks up
+ *****************************************/
 void SatellitePart::createBreakupDebris(
    std::vector<std::unique_ptr<Entity>>& debris) const
 {

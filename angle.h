@@ -11,6 +11,12 @@
 
 #include "constants.h"
 #include <cmath>
+class TestVelocity;
+class TestAcceleration;
+class TestAngle;
+class TestShip;
+class TestEntity;
+class TestSatellite;
 
 /*********************************************
  * Angle
@@ -23,6 +29,9 @@ public:
    friend class TestVelocity;
    friend class TestAcceleration;
    friend class TestAngle;
+   friend class TestShip;
+   friend class TestEntity;
+   friend class TestSatellite;
 
    Angle(double radians = 0.0) : radians(0.0) { setRadians(radians); }
    Angle(const Angle& rhs) : radians(rhs.radians) {}

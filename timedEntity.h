@@ -10,6 +10,8 @@
 #pragma once
 
 #include "entity.h"
+class TestFragment;
+class TestProjectile;
 
 /*********************************************
  * TimedEntity
@@ -19,6 +21,10 @@
 class TimedEntity : public Entity
 {
 public:
+   friend class TestFragment;
+   friend class TestTimedEntity;
+   friend class TestProjectile;
+
    // Constructors
    TimedEntity() : Entity(), age(0.0), expireTime(0.0) {}
    TimedEntity(const Position& pos, const Velocity& vel, double expireTime)

@@ -21,6 +21,8 @@
 class BreakableEntity : public Entity
 {
 public:
+   friend class TestBreakableEntity;
+
    // Constructors
    BreakableEntity() : Entity(), isHit(false) {}
    BreakableEntity(const Position& pos, const Velocity& vel)

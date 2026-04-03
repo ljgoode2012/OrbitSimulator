@@ -199,7 +199,7 @@ private:
       a.ddx = -99.9;
       a.ddy = -88.8;
       Angle angle;
-      angle.radians = 0.0; // up
+      angle.radians = 0.0;  // UP
       double magnitude = 3.3;
 
       // exercise
@@ -342,7 +342,9 @@ private:
    void addDDX_value()
    {
       // Setup
-      Acceleration a(2.3, 4.5);
+      Acceleration a;
+      a.ddx = 2.3;
+      a.ddy = 4.5;
 
       // Exercise
       a.addDDX(4.1);
@@ -359,7 +361,9 @@ private:
    void addDDY_zero()
    {
       // Setup
-      Acceleration a(2.3, 4.5);
+      Acceleration a;
+      a.ddx = 2.3;
+      a.ddy = 4.5;
 
       // Exercise
       a.addDDY(0.0);
@@ -376,7 +380,9 @@ private:
    void addDDY_value()
    {
       // Setup
-      Acceleration a(2.3, 4.5);
+      Acceleration a;
+      a.ddx = 2.3;
+      a.ddy = 4.5;
 
       // Exercise
       a.addDDY(4.1);
@@ -394,8 +400,12 @@ private:
    void add_zeroZero()
    {
       // setup
-      Acceleration aLHS(0.0, 0.0);
-      Acceleration aRHS(0.0, 0.0);
+      Acceleration aLHS;
+      aLHS.ddx = 0.0;
+      aLHS.ddy = 0.0;
+      Acceleration aRHS;
+      aRHS.ddx = 0.0;
+      aRHS.ddy = 0.0;
 
       // exercise
       aLHS.add(aRHS);
@@ -413,8 +423,12 @@ private:
    void add_valueZero()
    {
       // setup
-      Acceleration aLHS(1.1, 2.2);
-      Acceleration aRHS(0.0, 0.0);
+      Acceleration aLHS;
+      aLHS.ddx = 1.1;
+      aLHS.ddy = 2.2;
+      Acceleration aRHS;
+      aRHS.ddx = 0.0;
+      aRHS.ddy = 0.0;
 
       // exercise
       aLHS.add(aRHS);
@@ -432,8 +446,12 @@ private:
    void add_zeroValue()
    {
       // setup
-      Acceleration aLHS(0.0, 0.0);
-      Acceleration aRHS(4.4, 7.7);
+      Acceleration aLHS;
+      aLHS.ddx = 0.0;
+      aLHS.ddy = 0.0;
+      Acceleration aRHS;
+      aRHS.ddx = 4.4;
+      aRHS.ddy = 7.7;
 
       // exercise
       aLHS.add(aRHS);
@@ -450,8 +468,12 @@ private:
    void add_valueValue()
    {
       // setup
-      Acceleration aLHS(1.1, 2.2);
-      Acceleration aRHS(4.4, 7.7);
+      Acceleration aLHS;
+      aLHS.ddx = 1.1;
+      aLHS.ddy = 2.2;
+      Acceleration aRHS;
+      aRHS.ddx = 4.4;
+      aRHS.ddy = 7.7;
 
       // exercise
       aLHS.add(aRHS);

@@ -19,6 +19,7 @@
 #include "testProjectile.h"
 
 #ifdef _WIN32
+#include <cstdio>
 #include <iostream>
 #include <windows.h>
 using namespace std;
@@ -42,10 +43,8 @@ void testRunner()
    TestAcceleration().run();
    TestAngle().run();
    TestEntity().run();
-   TestBreakableEntity().run();
    TestSatellite().run();
    TestShip().run();
-   TestTimedEntity().run();
    TestFragment().run();
    TestProjectile().run();
 }

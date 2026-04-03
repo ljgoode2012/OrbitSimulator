@@ -15,9 +15,13 @@
 #include <iostream>
 
 class TestPosition;
-class Acceleration;
 class TestFragment;
 class TestProjectile;
+class TestEntity;
+class TestBreakableEntity;
+class TestTimedEntity;
+class TestSatellite;
+class TestShip;
 
 /*********************************************
  * Position
@@ -26,9 +30,14 @@ class TestProjectile;
 class Position
 {
 public:
-   friend TestPosition;
-   friend TestFragment;
-   friend TestProjectile;
+   friend class TestPosition;
+   friend class TestFragment;
+   friend class TestProjectile;
+   friend class TestEntity;
+   friend class TestBreakableEntity;
+   friend class TestTimedEntity;
+   friend class TestSatellite;
+   friend class TestShip;
 
    // constructors
    Position() : x(0.0), y(0.0) {}

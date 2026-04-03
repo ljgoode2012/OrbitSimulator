@@ -1,3 +1,12 @@
+/***********************************************************************
+ * Source File:
+ *    Velocity : The representation of velocity in 2D space
+ * Author:
+ *    Lindsey Goode, Porter Williams
+ * Summary:
+ *    Handles velocity calculations and operations
+ ************************************************************************/
+
 #include "velocity.h"
 #include "acceleration.h"
 #include "angle.h"
@@ -14,6 +23,10 @@ Angle Velocity::getAngle() const
    return angle;
 }
 
+/******************************************
+ * Velocity : Assignment Operator
+ * Assign one velocity to another
+ *****************************************/
 Velocity& Velocity::operator=(const Velocity& v)
 {
    if (this != &v)

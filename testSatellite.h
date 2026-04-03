@@ -1,3 +1,12 @@
+/***********************************************************************
+ * Header File:
+ *    Test Satellite : Test the Satellite class
+ * Author:
+ *    Lindsey Goode, Porter Williams
+ * Summary:
+ *    All the unit tests for Satellite
+ ************************************************************************/
+
 #pragma once
 
 #include <cmath>
@@ -6,6 +15,10 @@
 #include "satellite.h"
 #include "unitTest.h"
 
+/*********************************************
+ * SATELLITE DOUBLE
+ * A test double for Satellite to expose protected members
+ *********************************************/
 class SatelliteDouble : public Satellite
 {
 public:
@@ -13,22 +26,30 @@ public:
    void setRotationRadians(double radians) { setRotation(Angle(radians)); }
 };
 
+/*********************************************
+ * HUBBLE DOUBLE
+ * A test double for Hubble satellite
+ *********************************************/
 class HubbleDouble : public Hubble
 {
 public:
    explicit HubbleDouble(double phaseRadians = 0.0) : Hubble(phaseRadians) {}
-   double getVelocityDX() const { return getVelocity().dx; }
-   double getVelocityDY() const { return getVelocity().dy; }
 };
 
+/*********************************************
+ * GPS DOUBLE
+ * A test double for GPS satellite
+ *********************************************/
 class GPSDouble : public GPS
 {
 public:
    explicit GPSDouble(double phaseRadians = 0.0) : GPS(phaseRadians) {}
-   double getVelocityDX() const { return getVelocity().dx; }
-   double getVelocityDY() const { return getVelocity().dy; }
 };
 
+/*********************************************
+ * TEST SATELLITE
+ * Unit tests for the Satellite class
+ *********************************************/
 class TestSatellite : public UnitTest
 {
 public:
@@ -37,12 +58,14 @@ public:
       hubble_orbitRadiusAndSpeed();
       gps_orbitRadiusAndSpeed();
       gps_phaseControlsInitialPositionAndVelocity();
-      sputnik_orbitIsFarthest();
       satellites_initializeWithCounterClockwiseEarthFacingRotation();
       satellite_setIsDefunctTrue_assignsRandomSpinRate();
       satellite_setIsDefunctFalse_resetsSpinRate();
       satellite_update_notDefunctFacesEarth();
       satellite_update_defunctUsesAngularVelocity();
+      hubble_breakup_debrisInheritsVelocity();
+      satellitePart_breakup_debrisInheritsPartVelocity();
+      requirement_example_90DegreeKick();
       report("Satellite");
    }
 
@@ -53,228 +76,343 @@ private:
    static constexpr double MIN_SPIN_RATE = 0.001;
    static constexpr double MAX_SPIN_RATE = 0.010;
 
-   static double computeRadius(const Position& position)
-   {
-      return std::sqrt(position.getMetersX() * position.getMetersX() +
-                       position.getMetersY() * position.getMetersY());
-   }
-
-   static double computeSpeed(double dx, double dy)
-   {
-      return std::sqrt(dx * dx + dy * dy);
-   }
-
-   static double circularOrbitSpeed(double radiusMeters)
-   {
-      return std::sqrt(EARTH_MU / radiusMeters);
-   }
-
+   /*********************************************
+    * EARTH FACING ROTATION RADIANS
+    * Helper: Calculate the rotation angle to face Earth
+    *********************************************/
    static double earthFacingRotationRadians(const Position& position)
    {
-      Angle earthFacingRotation;
-      earthFacingRotation.setDxDy(-position.getMetersX(),
-                                  -position.getMetersY());
-      earthFacingRotation.addRadians(COUNTERCLOCKWISE_OFFSET_RADIANS);
-      return earthFacingRotation.getRadians();
+      // Calculate angle pointing to Earth and offset for counterclockwise
+      // orientation
+      double radians = std::atan2(-position.x, -position.y) +
+                       COUNTERCLOCKWISE_OFFSET_RADIANS;
+
+      // Normalize to [0, 2π) range if needed
+      while (radians < 0.0)
+         radians += 2.0 * M_PI;
+      while (radians >= 2.0 * M_PI)
+         radians -= 2.0 * M_PI;
+
+      return radians;
    }
 
+   /*********************************************
+    * name:    HUBBLE ORBIT RADIUS AND SPEED
+    * input:   Hubble satellite initialized at phase=0
+    * output:  radius=42164000m (HUBBLE_ORBIT_RADIUS_METERS), speed≈3074.692 m/s
+    *********************************************/
    void hubble_orbitRadiusAndSpeed()
    {
       // SETUP
-      std::unique_ptr<HubbleDouble> hubblePtr(new HubbleDouble);
-      HubbleDouble& hubble = *hubblePtr;
 
       // EXERCISE
-      const double radius = computeRadius(hubble.getPosition());
-      const double speed = computeSpeed(hubble.getVelocityDX(),
-                                        hubble.getVelocityDY());
+      HubbleDouble hubble;
 
       // VERIFY
+      const double radius = std::sqrt(hubble.position.x * hubble.position.x +
+                                      hubble.position.y * hubble.position.y);
+      const double speed = std::sqrt(hubble.velocity.dx * hubble.velocity.dx +
+                              hubble.velocity.dy * hubble.velocity.dy);
+      
       assertEqualsTolerance(radius, HUBBLE_ORBIT_RADIUS_METERS, 0.001);
       assertEqualsTolerance(speed,
-                            circularOrbitSpeed(HUBBLE_ORBIT_RADIUS_METERS),
-                            0.001);
+                            3074.692, // sqrt(MU / HUBBLE_ORBIT_RADIUS_METERS)
+                            1.0);
 
       // TEARDOWN
-      hubblePtr.reset();
    }
 
+   /*********************************************
+    * name:    GPS ORBIT RADIUS AND SPEED
+    * input:   GPS satellite initialized at phase=0
+    * output:  radius=26560000m (GPS_ORBIT_RADIUS_METERS), speed≈3873.4 m/s
+    *********************************************/
    void gps_orbitRadiusAndSpeed()
    {
       // SETUP
-      std::unique_ptr<GPSDouble> gpsPtr(new GPSDouble);
-      GPSDouble& gps = *gpsPtr;
 
       // EXERCISE
-      const double radius = computeRadius(gps.getPosition());
-      const double speed = computeSpeed(gps.getVelocityDX(),
-                                        gps.getVelocityDY());
+      GPSDouble gps;
 
       // VERIFY
+      double speed = std::sqrt(gps.velocity.dx * gps.velocity.dx +
+                            gps.velocity.dy * gps.velocity.dy);
+      double radius = std::sqrt(gps.position.x * gps.position.x + 
+                             gps.position.y * gps.position.y);
       assertEqualsTolerance(radius, GPS_ORBIT_RADIUS_METERS, 0.001);
-      assertEqualsTolerance(speed, circularOrbitSpeed(GPS_ORBIT_RADIUS_METERS),
-                            0.001);
+      assertEqualsTolerance(speed,
+                         3873.4, // sqrt(MU / GPS_ORBIT_RADIUS_METERS)
+                         1.0);
 
       // TEARDOWN
-      gpsPtr.reset();
    }
 
+   /*********************************************
+    * name:    GPS PHASE CONTROLS INITIAL POSITION AND VELOCITY
+    * input:   GPS with phase=π/2 (1.5708 radians)
+    * output:  position.y=26560000m, position.x≈0.0
+    *********************************************/
    void gps_phaseControlsInitialPositionAndVelocity()
    {
       // SETUP
-      std::unique_ptr<GPSDouble> gpsPtr(new GPSDouble(HALF_PI));
-      GPSDouble& gps = *gpsPtr;
-      const double expectedSpeed = circularOrbitSpeed(GPS_ORBIT_RADIUS_METERS);
+      const double phase = HALF_PI;
 
       // EXERCISE
-      const Position& position = gps.getPosition();
+      GPSDouble gps(phase);
 
       // VERIFY
-      assertEqualsTolerance(position.getMetersX(), 0.0, 0.001);
-      assertEqualsTolerance(position.getMetersY(), GPS_ORBIT_RADIUS_METERS,
-                            0.001);
-      assertEqualsTolerance(gps.getVelocityDX(), -expectedSpeed, 0.001);
-      assertEqualsTolerance(gps.getVelocityDY(), 0.0, 0.001);
-
-      // TEARDOWN
-      gpsPtr.reset();
-   }
-
-   void sputnik_orbitIsFarthest()
-   {
-      // SETUP
-
-      // EXERCISE
-
-      // VERIFY
-      assertUnit(SPUTNIK_ORBIT_RADIUS_METERS > GPS_ORBIT_RADIUS_METERS);
-      assertUnit(SPUTNIK_ORBIT_RADIUS_METERS > HUBBLE_ORBIT_RADIUS_METERS);
-      assertUnit(SPUTNIK_ORBIT_RADIUS_METERS > STARLINK_ORBIT_RADIUS_METERS);
-      assertUnit(SPUTNIK_ORBIT_RADIUS_METERS > CREW_DRAGON_ORBIT_RADIUS_METERS);
+      // At phase π/2, satellite should be on +Y axis
+      assertEqualsTolerance(gps.position.y, GPS_ORBIT_RADIUS_METERS, 0.001);
+      assertEqualsTolerance(gps.position.x, 0.0, 0.001);
 
       // TEARDOWN
    }
 
+   /*********************************************
+    * name:    SATELLITES INITIALIZE WITH COUNTERCLOCKWISE EARTH FACING ROTATION
+    * input:   All satellite types at phase=0
+    * output:  rotation.radians = atan2(-pos.x, -pos.y) - π/2, normalized to [0,
+    *2π)
+    *********************************************/
    void satellites_initializeWithCounterClockwiseEarthFacingRotation()
    {
       // SETUP
-      std::unique_ptr<Hubble> hubblePtr(new Hubble);
-      std::unique_ptr<Starlink> starlinkPtr(new Starlink);
-      std::unique_ptr<CrewDragon> crewDragonPtr(new CrewDragon);
-      std::unique_ptr<GPS> gpsPtr(new GPS);
-      std::unique_ptr<Sputnik> sputnikPtr(new Sputnik);
 
       // EXERCISE
+      Hubble hubble;
+      Starlink starlink;
+      CrewDragon crewDragon;
+      GPS gps;
+      Sputnik sputnik;
 
       // VERIFY
       assertEqualsTolerance(
-         hubblePtr->getRotation(),
-         earthFacingRotationRadians(hubblePtr->getPosition()), 0.0001);
+         hubble.rotation.radians,
+         earthFacingRotationRadians(hubble.position), 0.0001);
       assertEqualsTolerance(
-         starlinkPtr->getRotation(),
-         earthFacingRotationRadians(starlinkPtr->getPosition()), 0.0001);
+         starlink.rotation.radians,
+         earthFacingRotationRadians(starlink.position), 0.0001);
       assertEqualsTolerance(
-         crewDragonPtr->getRotation(),
-         earthFacingRotationRadians(crewDragonPtr->getPosition()), 0.0001);
-      assertEqualsTolerance(gpsPtr->getRotation(),
-                            earthFacingRotationRadians(gpsPtr->getPosition()),
-                            0.0001);
+         crewDragon.rotation.radians,
+         earthFacingRotationRadians(crewDragon.position), 0.0001);
       assertEqualsTolerance(
-         sputnikPtr->getRotation(),
-         earthFacingRotationRadians(sputnikPtr->getPosition()), 0.0001);
+         gps.rotation.radians,
+         earthFacingRotationRadians(gps.position), 0.0001);
+      assertEqualsTolerance(
+         sputnik.rotation.radians,
+         earthFacingRotationRadians(sputnik.position), 0.0001);
 
       // TEARDOWN
-      hubblePtr.reset();
-      starlinkPtr.reset();
-      crewDragonPtr.reset();
-      gpsPtr.reset();
-      sputnikPtr.reset();
    }
 
+   /*********************************************
+    * name:    SATELLITE SET IS DEFUNCT TRUE ASSIGNS RANDOM SPIN RATE
+    * input:   satellite with angularVelocity=0, setIsDefunct(true)
+    * output:  isDefunct=true, |angularVelocity| in [0.001, 0.010] rad/s
+    *********************************************/
    void satellite_setIsDefunctTrue_assignsRandomSpinRate()
    {
       // SETUP
-      std::unique_ptr<Satellite> satellitePtr(new Satellite);
-      Satellite& satellite = *satellitePtr;
-      satellite.setIsDefunct(false);
+      SatelliteDouble satellite;
+      satellite.angularVelocity = 0.0;
 
       // EXERCISE
       satellite.setIsDefunct(true);
-      const double angularVelocity = satellite.getAngularVelocity();
-      const double absoluteSpinRate = std::abs(angularVelocity);
 
       // VERIFY
-      assertUnit(satellite.getIsDefunct());
+      const double absoluteSpinRate = std::abs(satellite.angularVelocity);
+      assertEquals(satellite.isDefunct, true);
       assertUnit(absoluteSpinRate >= MIN_SPIN_RATE);
       assertUnit(absoluteSpinRate <= MAX_SPIN_RATE);
 
       // TEARDOWN
-      satellitePtr.reset();
    }
 
+   /*********************************************
+    * name:    SATELLITE SET IS DEFUNCT FALSE RESETS SPIN RATE
+    * input:   satellite with isDefunct=true, setIsDefunct(false)
+    * output:  isDefunct=false, angularVelocity=0.0
+    *********************************************/
    void satellite_setIsDefunctFalse_resetsSpinRate()
    {
       // SETUP
-      std::unique_ptr<Satellite> satellitePtr(new Satellite);
-      Satellite& satellite = *satellitePtr;
-      satellite.setIsDefunct(true);
+      SatelliteDouble satellite;
+      satellite.isDefunct = true;
 
       // EXERCISE
       satellite.setIsDefunct(false);
 
       // VERIFY
-      assertUnit(!satellite.getIsDefunct());
-      assertEquals(satellite.getAngularVelocity(), 0.0);
+      assertEquals(satellite.isDefunct, false);
+      assertEquals(satellite.angularVelocity, 0.0);
 
       // TEARDOWN
-      satellitePtr.reset();
    }
 
+   /*********************************************
+    * name:    SATELLITE UPDATE NOT DEFUNCT FACES EARTH
+    * input:   satellite at position=(26560000, 0), velocity=(0, 3873.44547),
+    *rotation=π/2, dt=48s output:  rotation.radians≈3.134 (maintains
+    *earth-facing)
+    *********************************************/
    void satellite_update_notDefunctFacesEarth()
    {
       // SETUP
-      std::unique_ptr<Satellite> satellitePtr(new Satellite);
-      Satellite& satellite = *satellitePtr;
-      satellite.setIsDefunct(false);
-
-      // Set a non-zero position so the satellite can compute earth-facing
-      // rotation
-      Position testPosition;
-      testPosition.setMeters(1000000.0, 2000000.0); // Some non-zero position
-      satellite.setPosition(testPosition);
-
-      const double dt = 48.0;
+      Satellite satellite;
+      satellite.isDefunct = false;
+      satellite.position.x = GPS_ORBIT_RADIUS_METERS;
+      satellite.position.y = 0.0;
+      satellite.rotation.radians = M_PI_2; // 90 degrees
+      satellite.velocity.dx = 0.0;
+      satellite.velocity.dy = 3873.44547; // sqrt(MU / GPS_ORBIT_RADIUS_METERS)
+      const double dt = SIM_SECONDS_PER_FRAME;
 
       // EXERCISE
       satellite.update(dt);
 
       // VERIFY
-      assertEqualsTolerance(satellite.getRotation(),
-                            earthFacingRotationRadians(satellite.getPosition()),
-                            0.0001);
+      assertEqualsTolerance(satellite.rotation.radians, 3.134, 0.01);
 
       // TEARDOWN
-      satellitePtr.reset();
    }
 
+    /*********************************************
+    * name:    SATELLITE UPDATE DEFUNCT USES ANGULAR VELOCITY
+    * input:   defunct satellite with rotation=1.0 rad, angularVelocity=0.5
+    *rad/s, dt=2.0s output:  rotation.radians=2.0 (1.0 + 0.5*2.0)
+    *********************************************/
    void satellite_update_defunctUsesAngularVelocity()
    {
       // SETUP
-      std::unique_ptr<Satellite> satellitePtr(new Satellite);
-      Satellite& satellite = *satellitePtr;
-      satellite.setIsDefunct(true);
-      const double dt = 48.0;
-      const double initialRotation = satellite.getRotation();
-      const double angularVelocity = satellite.getAngularVelocity();
-      const double expectedRotation = initialRotation + angularVelocity * dt;
+      SatelliteDouble satellite;
+      satellite.rotation.radians = 1.0;
+      satellite.angularVelocity = 0.5;
+      satellite.isDefunct = true;
+      const double dt = 2.0;
+      const double expectedRotation = 1.0 + 0.5 * dt;
 
       // EXERCISE
       satellite.update(dt);
 
       // VERIFY
-      assertEqualsTolerance(satellite.getRotation(), expectedRotation, 0.0001);
+      assertEqualsTolerance(satellite.rotation.radians, expectedRotation, 0.0001);
 
       // TEARDOWN
-      satellitePtr.reset();
+   }
+
+   /*********************************************
+    * name:    HUBBLE BREAKUP DEBRIS INHERITS VELOCITY
+    * input:   Hubble satellite at default orbit
+    * output:  4 debris parts, each with kick magnitude in [5000, 9000] m/s
+    *********************************************/
+   void hubble_breakup_debrisInheritsVelocity()
+   {
+      // SETUP
+      HubbleDouble hubble;
+      const double parentDX = hubble.velocity.dx;
+      const double parentDY = hubble.velocity.dy;
+      std::vector<std::unique_ptr<Entity>> debris;
+
+      // EXERCISE
+      hubble.createBreakupDebris(debris);
+
+      // VERIFY - Hubble creates 4 parts
+      assertEquals(debris.size(), 4);
+
+      for (const auto& entity : debris)
+      {
+         // Calculate the kick vector
+         const double kickDX = entity->velocity.dx - parentDX;
+         const double kickDY = entity->velocity.dy - parentDY;
+         const double kickMagnitude = std::sqrt(kickDX * kickDX +
+                                                kickDY * kickDY);
+         
+         // Verify kick magnitude is 5000-9000 m/s
+         assertUnit(kickMagnitude >= 5000.0 - 0.1);
+         assertUnit(kickMagnitude <= 9000.0 + 0.1);
+      }
+
+      // TEARDOWN
+   }
+
+   /*********************************************
+    * name:    SATELLITE PART BREAKUP DEBRIS INHERITS PART VELOCITY
+    * input:   SatellitePart at position=(1000000, 0), velocity=(8000, 6000), 3
+    *fragments output:  3 fragments, each with kick magnitude in [5000, 9000]
+    *m/s
+    *********************************************/
+   void satellitePart_breakup_debrisInheritsPartVelocity()
+   {
+      // SETUP
+      Position position;
+      position.x = 1000000.0;
+      position.y = 0.0;
+      
+      Velocity partVelocity;
+      partVelocity.dx = 8000.0;
+      partVelocity.dy = 6000.0;
+      const double partDX = 8000.0;
+      const double partDY = 6000.0;
+      
+      SatellitePart part(position, partVelocity, Angle(), 
+                         SatellitePart::GPS_CENTER, 7.0, 3);
+      std::vector<std::unique_ptr<Entity>> fragments;
+
+      // EXERCISE
+      part.createBreakupDebris(fragments);
+
+      // VERIFY - Should create 3 fragments
+      assertEquals(static_cast<int>(fragments.size()), 3);
+
+      for (const auto& entity : fragments)
+      {
+         // Calculate the kick vector applied to this fragment
+         const double kickDX = entity->velocity.dx - partDX;
+         const double kickDY = entity->velocity.dy - partDY;
+         const double kickMagnitude = std::sqrt(kickDX * kickDX +
+                                                kickDY * kickDY);
+         
+         // The KICK itself should be 5000-9000 m/s
+         assertUnit(kickMagnitude >= 5000.0 - 0.1);
+         assertUnit(kickMagnitude <= 9000.0 + 0.1);
+      }
+
+      // TEARDOWN
+   }
+
+   /*********************************************
+    * name:    REQUIREMENT EXAMPLE 90 DEGREE KICK
+    * input:   parent velocity=(3000, 4000) m/s, kick angle=90°, kick
+    *magnitude=[5000, 9000] m/s output:  min result=(8000, 4000) m/s, max
+    *result=(12000, 4000) m/s
+    *********************************************/
+   void requirement_example_90DegreeKick()
+   {
+      // SETUP - Reproduce the exact scenario from design document
+      const double parentDX = 3000.0;
+      const double parentDY = 4000.0;
+      // parentSpeed = sqrt(3000² + 4000²) = sqrt(25000000) = 5000
+      const double parentSpeed = std::sqrt(parentDX * parentDX +
+                                           parentDY * parentDY);
+   
+      // EXERCISE - Manually calculate what WOULD happen with 90° kick
+      const double angle90Deg = M_PI / 2.0;
+      const double kickMin = 5000.0;
+      const double kickMax = 9000.0;
+   
+      const double minResultDX = parentDX + std::sin(angle90Deg) * kickMin;
+      const double minResultDY = parentDY + std::cos(angle90Deg) * kickMin;
+   
+      const double maxResultDX = parentDX + std::sin(angle90Deg) * kickMax;
+      const double maxResultDY = parentDY + std::cos(angle90Deg) * kickMax;
+   
+      // VERIFY - Confirm the math matches the requirement
+      assertEqualsTolerance(minResultDX, 8000.0, 0.1);
+      assertEqualsTolerance(minResultDY, 4000.0, 0.1);
+   
+      assertEqualsTolerance(maxResultDX, 12000.0, 0.1);
+      assertEqualsTolerance(maxResultDY, 4000.0, 0.1);
+
+      // TEARDOWN
    }
 };

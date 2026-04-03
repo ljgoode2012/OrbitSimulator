@@ -15,14 +15,18 @@
 #include "constants.h"
 #include "timedEntity.h"
 
+class testFragment;
+class TestSatellite;
 /*********************************************
  * Fragment
  * A small piece of debris with a limited
  * lifetime and wild rotation
  *********************************************/
+
 class Fragment : public TimedEntity
 {
 public:
+   friend class TestFragment;
    Fragment() : TimedEntity(), collisionImmunityFrames(0) {}
    Fragment(const Position& pos, const Velocity& vel, double expireTimeSeconds)
        : TimedEntity(pos, vel, expireTimeSeconds),
@@ -107,6 +111,7 @@ protected:
                                 double phaseRadians = 0.0);
 
 public:
+   friend class TestSatellite;
    // Constructors
    Satellite() : BreakableEntity(), isDefunct(false)
    {

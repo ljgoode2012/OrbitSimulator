@@ -39,6 +39,11 @@ public:
    }
 
 private:
+   /*********************************************
+    * name:    CONSTRUCT DEFAULT
+    * input:   nothing
+    * output:  position=(0,0), age=0, expireTime=0, not collision immune
+    *********************************************/
    void construct_default()
    {
       // SETUP
@@ -47,15 +52,20 @@ private:
       // EXERCISE
 
       // VERIFY
-      assertEquals(fragment.getPosition().getMetersX(), 0.0);
-      assertEquals(fragment.getPosition().getMetersY(), 0.0);
-      assertEquals(fragment.getAge(), 0.0);
-      assertEquals(fragment.getExpireTime(), 0.0);
+      assertEquals(fragment.position.x, 0.0);
+      assertEquals(fragment.position.y, 0.0);
+      assertEquals(fragment.age, 0.0);
+      assertEquals(fragment.expireTime, 0.0);
       assertUnit(!fragment.isCollisionImmune());
 
       // TEARDOWN
    }
 
+   /*********************************************
+    * name:    CONSTRUCT NON-DEFAULT
+    * input:   position=(1000.0, 2000.0), velocity=(500.0, -300.0), expireTime=75.0
+    * output:  fragment with specified values, age=0.0
+    *********************************************/
    void construct_nonDefault()
    {
       // SETUP
@@ -71,16 +81,21 @@ private:
       Fragment fragment(position, velocity, expireTime);
 
       // VERIFY
-      assertEquals(fragment.getPosition().getMetersX(), 1000.0);
-      assertEquals(fragment.getPosition().getMetersY(), 2000.0);
-      assertEquals(fragment.getVelocity().dx, 500.0);
-      assertEquals(fragment.getVelocity().dy, -300.0);
-      assertEquals(fragment.getAge(), 0.0);
-      assertEquals(fragment.getExpireTime(), expireTime);
+      assertEquals(fragment.position.x, 1000.0);
+      assertEquals(fragment.position.y, 2000.0);
+      assertEquals(fragment.velocity.dx, 500.0);
+      assertEquals(fragment.velocity.dy, -300.0);
+      assertEquals(fragment.age, 0.0);
+      assertEquals(fragment.expireTime, expireTime);
 
       // TEARDOWN
    }
 
+   /*********************************************
+    * name:    CONSTRUCT SETS COLLISION IMMUNITY
+    * input:   position=(1000.0, 2000.0), velocity=(100.0, 200.0), expireTime=100.0
+    * output:  collisionImmunityFrames=COLLISION_IMMUNITY_FRAMES
+    *********************************************/
    void construct_setsCollisionImmunity()
    {
       // SETUP
@@ -95,11 +110,16 @@ private:
       Fragment fragment(position, velocity, 100.0);
 
       // VERIFY
-      assertUnit(fragment.isCollisionImmune());
+      assertEquals(fragment.collisionImmunityFrames, COLLISION_IMMUNITY_FRAMES);
 
       // TEARDOWN
    }
 
+   /*********************************************
+    * name:    UPDATE DECREMENTS IMMUNITY
+    * input:   fragment with collisionImmunityFrames=2, dt=1.0
+    * output:  collisionImmunityFrames=1
+    *********************************************/
    void update_decrementsImmunity()
    {
       // SETUP
@@ -109,17 +129,25 @@ private:
       Velocity velocity;
       velocity.dx = 100.0;
       velocity.dy = 200.0;
-      Fragment fragment(position, velocity, 100.0);
+      Fragment fragment;
+      fragment.position = position;
+      fragment.velocity = velocity;
+      fragment.collisionImmunityFrames = 2;
 
       // EXERCISE
       fragment.update(1.0);
 
-      // VERIFY - Should still have 2 frames remaining
-      assertUnit(fragment.isCollisionImmune());
+      // VERIFY
+      assertEquals(fragment.collisionImmunityFrames, 1);
 
       // TEARDOWN
    }
 
+   /*********************************************
+    * name:    UPDATE DECREMENTS IMMUNITY TO ZERO
+    * input:   fragment with collisionImmunityFrames=1, dt=1.0
+    * output:  collisionImmunityFrames=0
+    *********************************************/
    void update_decrementsImmunityToZero()
    {
       // SETUP
@@ -129,38 +157,45 @@ private:
       Velocity velocity;
       velocity.dx = 100.0;
       velocity.dy = 200.0;
-      Fragment fragment(position, velocity, 100.0);
+      Fragment fragment;
+      fragment.position = position;
+      fragment.velocity = velocity;
+      fragment.collisionImmunityFrames = 1;
 
-      // EXERCISE - Update COLLISION_IMMUNITY_FRAMES times
-      fragment.update(1.0);
-      fragment.update(1.0);
+      // EXERCISE
       fragment.update(1.0);
 
-      // VERIFY - Immunity should now be expired
-      assertUnit(!fragment.isCollisionImmune());
+      // VERIFY
+      assertEquals(fragment.collisionImmunityFrames, 0);
 
       // TEARDOWN
    }
 
+   /*********************************************
+    * name:    IS COLLISION IMMUNE TRUE WHEN ACTIVE
+    * input:   fragment with collisionImmunityFrames=3
+    * output:  isCollisionImmune()=true
+    *********************************************/
    void isCollisionImmune_trueWhenActive()
    {
       // SETUP
-      Position position;
-      position.x = 1000.0;
-      position.y = 2000.0;
-      Velocity velocity;
-      velocity.dx = 100.0;
-      velocity.dy = 200.0;
-      Fragment fragment(position, velocity, 100.0);
+      Fragment fragment;
+      fragment.collisionImmunityFrames = 3; // Set immunity to active value
 
       // EXERCISE
+      bool result = fragment.isCollisionImmune();
 
-      // VERIFY - Just created, should have full immunity
-      assertUnit(fragment.isCollisionImmune());
+      // VERIFY
+      assertEquals(result, true);
 
       // TEARDOWN
    }
 
+   /*********************************************
+    * name:    IS COLLISION IMMUNE FALSE WHEN EXPIRED
+    * input:   fragment with collisionImmunityFrames=0
+    * output:  isCollisionImmune()=false
+    *********************************************/
    void isCollisionImmune_falseWhenExpired()
    {
       // SETUP
@@ -170,19 +205,25 @@ private:
       Velocity velocity;
       velocity.dx = 100.0;
       velocity.dy = 200.0;
-      Fragment fragment(position, velocity, 100.0);
-      fragment.update(1.0);
-      fragment.update(1.0);
-      fragment.update(1.0);
+      Fragment fragment;
+      fragment.position = position;
+      fragment.velocity = velocity;
+      fragment.collisionImmunityFrames = 0;
 
       // EXERCISE
+      bool result = fragment.isCollisionImmune();
 
-      // VERIFY - After 3 updates, immunity should be gone
-      assertUnit(!fragment.isCollisionImmune());
+      // VERIFY
+      assertEquals(result, false);
 
       // TEARDOWN
    }
 
+   /*********************************************
+    * name:    IS EXPIRED FALSE WHEN AGE IS LESS
+    * input:   fragment with expireTime=5.0, age=4.0
+    * output:  isExpired()=false
+    *********************************************/
    void isExpired_falseWhenAgeIsLess()
    {
       // SETUP
@@ -192,17 +233,26 @@ private:
       Velocity velocity;
       velocity.dx = 100.0;
       velocity.dy = 200.0;
-      Fragment fragment(position, velocity, 100.0);
-      fragment.update(1.0);
+      Fragment fragment;
+      fragment.position = position;
+      fragment.velocity = velocity;
+      fragment.expireTime = 5.0;
+      fragment.age = 4.0;
 
       // EXERCISE
+      bool result = fragment.isExpired();
 
-      // VERIFY - Age is 1.0, expire time is 100.0
-      assertUnit(!fragment.isExpired());
+      // VERIFY
+      assertEquals(result, false);
 
       // TEARDOWN
    }
 
+   /*********************************************
+    * name:    IS EXPIRED TRUE WHEN LIFETIME EXCEEDED
+    * input:   fragment with expireTime=5.0, age=6.0
+    * output:  isExpired()=true
+    *********************************************/
    void isExpired_trueWhenLifetimeExceeded()
    {
       // SETUP
@@ -212,20 +262,26 @@ private:
       Velocity velocity;
       velocity.dx = 100.0;
       velocity.dy = 200.0;
-      Fragment fragment(position, velocity, 5.0);
+      Fragment fragment;
+      fragment.position = position;
+      fragment.velocity = velocity;
+      fragment.expireTime = 5.0;
+      fragment.age = 6.0;
 
-      // EXERCISE - Age past expire time
-      for (int i = 0; i < 6; ++i)
-      {
-         fragment.update(1.0);
-      }
+      // EXERCISE
+      bool result = fragment.isExpired();
 
-      // VERIFY - Age is 6.0, expire time is 5.0
-      assertUnit(fragment.isExpired());
+      // VERIFY
+      assertEquals(result, true);
 
       // TEARDOWN
    }
 
+   /*********************************************
+    * name:    IS EXPIRED TRUE WHEN LIFETIME EQUAL
+    * input:   fragment with expireTime=5.0, age=5.0
+    * output:  isExpired()=true
+    *********************************************/
    void isExpired_trueWhenLifetimeEqual()
    {
       // SETUP
@@ -235,20 +291,26 @@ private:
       Velocity velocity;
       velocity.dx = 100.0;
       velocity.dy = 200.0;
-      Fragment fragment(position, velocity, 5.0);
+      Fragment fragment;
+      fragment.position = position;
+      fragment.velocity = velocity;
+      fragment.expireTime = 5.0;
+      fragment.age = 5.0;
 
-      // EXERCISE - Age exactly to expire time
-      for (int i = 0; i < 5; ++i)
-      {
-         fragment.update(1.0);
-      }
+      // EXERCISE
+      bool result = fragment.isExpired();
 
-      // VERIFY - Age is 5.0, expire time is 5.0
-      assertUnit(fragment.isExpired());
+      // VERIFY
+      assertEquals(result, true);
 
       // TEARDOWN
    }
 
+   /*********************************************
+    * name:    GET COLLISION RADIUS PIXELS RETURNS FRAGMENT RADIUS
+    * input:   default fragment
+    * output:  radius=FRAGMENT_COLLISION_RADIUS_PIXELS
+    *********************************************/
    void getCollisionRadiusPixels_returnsFragmentRadius()
    {
       // SETUP
@@ -263,6 +325,11 @@ private:
       // TEARDOWN
    }
 
+   /*********************************************
+    * name:    UPDATE INCREMENTS AGE
+    * input:   fragment with age=0.0, expireTime=100.0, three updates with dt=1.0
+    * output:  age=3.0
+    *********************************************/
    void update_incrementsAge()
    {
       // SETUP
@@ -272,7 +339,10 @@ private:
       Velocity velocity;
       velocity.dx = 100.0;
       velocity.dy = 200.0;
-      Fragment fragment(position, velocity, 100.0);
+      Fragment fragment;
+      fragment.position = position;
+      fragment.velocity = velocity;
+      fragment.expireTime = 100.0;
 
       // EXERCISE
       fragment.update(1.0);
@@ -280,7 +350,7 @@ private:
       fragment.update(1.0);
 
       // VERIFY - Should have aged 3 seconds
-      assertEquals(fragment.getAge(), 3.0);
+      assertEquals(fragment.age, 3.0);
 
       // TEARDOWN
    }

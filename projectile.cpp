@@ -1,8 +1,21 @@
+/***********************************************************************
+ * Source File:
+ *    Projectile : The representation of a fired projectile
+ * Author:
+ *    Lindsey Goode and Porter Williams
+ * Summary:
+ *    Handles projectile creation and initialization from a ship
+ ************************************************************************/
+
 #include "projectile.h"
 #include "constants.h"
 #include "ship.h"
 #include <cmath>
 
+/******************************************
+ * Projectile : createFromShip
+ * Create a projectile from a ship's position and velocity
+ *****************************************/
 Projectile Projectile::createFromShip(const Ship& ship)
 {
    const double radians = ship.getRotation().getRadians();

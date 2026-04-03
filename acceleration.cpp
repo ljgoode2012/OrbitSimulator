@@ -1,6 +1,6 @@
 /***********************************************************************
  * Source File:
- *    ACCELERATION
+ *    Acceleration : The representation of acceleration in 2D space
  * Author:
  *    Lindsey Goode and Porter Williams
  * Summary:
@@ -11,26 +11,30 @@
 #include "angle.h"
 #include <cmath>
 
-/*********************************************
- * ACCELERATION : SET
- *  set from angle and direction
- *********************************************/
+/******************************************
+ * Acceleration : Set
+ * Set acceleration from angle and magnitude
+ *****************************************/
 void Acceleration::set(const Angle& a, double magnitude)
 {
    ddx = magnitude * sin(a.getRadians());
    ddy = magnitude * cos(a.getRadians());
 }
 
-/*********************************************
- * ACCELERATION : ADD
- *  Add two acceleration objects
- *********************************************/
+/******************************************
+ * Acceleration : Add
+ * Add two acceleration objects together
+ *****************************************/
 void Acceleration::add(const Acceleration& rhs)
 {
    ddx += rhs.getDDX();
    ddy += rhs.getDDY();
 }
 
+/******************************************
+ * Acceleration : Assignment Operator
+ * Assign one acceleration to another
+ *****************************************/
 Acceleration& Acceleration::operator=(const Acceleration& a)
 {
    if (this != &a)

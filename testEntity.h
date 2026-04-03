@@ -1,13 +1,26 @@
+/***********************************************************************
+ * Header File:
+ *    Test Entity : Test the Entity class
+ * Author:
+ *    Lindsey Goode, Porter Williams
+ * Summary:
+ *    All the unit tests for Entity
+ ************************************************************************/
+
 #pragma once
 
 #include <cmath>
 #include <memory>
 
 #include "breakableEntity.h"
-#include "constants.h" // Add this include
+#include "constants.h"
 #include "timedEntity.h"
 #include "unitTest.h"
 
+/*********************************************
+ * ENTITY DOUBLE
+ * A test double for Entity to expose protected members
+ *********************************************/
 class EntityDouble : public Entity
 {
 public:
@@ -23,6 +36,10 @@ public:
    void setRotationRadians(double radians) { setRotation(Angle(radians)); }
 };
 
+/*********************************************
+ * TEST ENTITY
+ * Unit tests for the Entity class
+ *********************************************/
 class TestEntity : public UnitTest
 {
 public:
@@ -39,456 +56,290 @@ public:
       update_rotationWrapsPositive();
       update_rotationWrapsNegative();
       update_negativeTimeDelta();
+      update_zeroTimeDelta();
       report("Entity");
    }
 
 private:
-   static constexpr double TWO_PI = 2.0 * M_PI; // Use M_PI from constants.h
+   static constexpr double TWO_PI = 2.0 * M_PI;
 
-   void construct_default()
-   {
-      // SETUP
-      std::unique_ptr<EntityDouble> entityPtr(new EntityDouble);
-      EntityDouble& entity = *entityPtr;
-
-      // EXERCISE
-
-      // VERIFY
-      assertEquals(entity.getPosition().getMetersX(), 0.0);
-      assertEquals(entity.getPosition().getMetersY(), 0.0);
-      assertEquals(entity.getVelocityDX(), 0.0);
-      assertEquals(entity.getVelocityDY(), 0.0);
-      assertEquals(entity.getRotation(), 0.0);
-      assertEquals(entity.getAngularVelocity(), 0.0);
-
-      // TEARDOWN
-      entityPtr.reset();
-   }
-
-   void construct_nonDefault()
-   {
-      // SETUP
-      Position position;
-      position.setMetersX(10.0);
-      position.setMetersY(20.0);
-      Velocity velocity;
-      velocity.dx = 30.0;
-      velocity.dy = 40.0;
-      const Angle rotation(1.5);
-      const double angularVelocity = -0.25;
-      std::unique_ptr<EntityDouble> entityPtr(
-         new EntityDouble(position, velocity, rotation, angularVelocity));
-      EntityDouble& entity = *entityPtr;
-
-      // EXERCISE
-
-      // VERIFY
-      assertEquals(entity.getPosition().getMetersX(), 10.0);
-      assertEquals(entity.getPosition().getMetersY(), 20.0);
-      assertEquals(entity.getVelocityDX(), 30.0);
-      assertEquals(entity.getVelocityDY(), 40.0);
-      assertEquals(entity.getRotation(), 1.5);
-      assertEquals(entity.getAngularVelocity(), -0.25);
-
-      // TEARDOWN
-      entityPtr.reset();
-   }
-
-   void setPosition_updatesPosition()
-   {
-      // SETUP
-      std::unique_ptr<EntityDouble> entityPtr(new EntityDouble);
-      EntityDouble& entity = *entityPtr;
-      Position position;
-      position.setMeters(1234.5, -6789.0);
-
-      // EXERCISE
-      entity.setPosition(position);
-
-      // VERIFY
-      assertEquals(entity.getPosition().getMetersX(), 1234.5);
-      assertEquals(entity.getPosition().getMetersY(), -6789.0);
-
-      // TEARDOWN
-      entityPtr.reset();
-   }
-
-   void setVelocity_updatesVelocity()
-   {
-      // SETUP
-      std::unique_ptr<EntityDouble> entityPtr(new EntityDouble);
-      EntityDouble& entity = *entityPtr;
-      Velocity velocity;
-      velocity.dx = -101.0;
-      velocity.dy = 202.0;
-
-      // EXERCISE
-      entity.setVelocity(velocity);
-
-      // VERIFY
-      assertEquals(entity.getVelocityDX(), -101.0);
-      assertEquals(entity.getVelocityDY(), 202.0);
-
-      // TEARDOWN
-      entityPtr.reset();
-   }
-
-   void setAngularVelocity_updatesAngularVelocity()
-   {
-      // SETUP
-      std::unique_ptr<EntityDouble> entityPtr(new EntityDouble);
-      EntityDouble& entity = *entityPtr;
-
-      // EXERCISE
-      entity.setAngularVelocity(0.75);
-
-      // VERIFY
-      assertEquals(entity.getAngularVelocity(), 0.75);
-
-      // TEARDOWN
-      entityPtr.reset();
-   }
-
-   void update_zeroPositionNoGravity()
-   {
-      // SETUP
-      std::unique_ptr<EntityDouble> entityPtr(new EntityDouble);
-      EntityDouble& entity = *entityPtr;
-      entity.setVelocity(Velocity(10.0, -20.0));
-
-      // EXERCISE
-      entity.update(2.0);
-
-      // VERIFY
-      assertEquals(entity.getPosition().getMetersX(), 20.0);
-      assertEquals(entity.getPosition().getMetersY(), -40.0);
-      assertEquals(entity.getVelocityDX(), 10.0);
-      assertEquals(entity.getVelocityDY(), -20.0);
-
-      // TEARDOWN
-      entityPtr.reset();
-   }
-
-   void update_nonZeroPositionChangesState()
-   {
-      // SETUP
-      Position position;
-      position.setMeters(7000000.0, 0.0);
-      Velocity velocity;
-      velocity.dx = 0.0;
-      velocity.dy = 7500.0;
-      std::unique_ptr<EntityDouble> entityPtr(
-         new EntityDouble(position, velocity, Angle(0.0), 0.0));
-      EntityDouble& entity = *entityPtr;
-
-      // EXERCISE
-      entity.update(1.0);
-
-      // VERIFY
-      assertUnit(entity.getVelocityDX() < 0.0);
-      assertEqualsTolerance(entity.getVelocityDY(), 7500.0, 0.001);
-      assertUnit(entity.getPosition().getMetersX() < 7000000.0);
-      assertUnit(entity.getPosition().getMetersY() > 0.0);
-
-      // TEARDOWN
-      entityPtr.reset();
-   }
-
-   void update_nonZeroAngularVelocityChangesRotation()
-   {
-      // SETUP
-      std::unique_ptr<EntityDouble> entityPtr(new EntityDouble);
-      EntityDouble& entity = *entityPtr;
-      entity.setAngularVelocity(0.5);
-
-      // EXERCISE
-      entity.update(2.0);
-
-      // VERIFY
-      assertEqualsTolerance(entity.getRotation(), 1.0, 0.0001);
-
-      // TEARDOWN
-      entityPtr.reset();
-   }
-
-   void update_rotationWrapsPositive()
-   {
-      // SETUP
-      std::unique_ptr<EntityDouble> entityPtr(new EntityDouble);
-      EntityDouble& entity = *entityPtr;
-      entity.setRotationRadians(TWO_PI - 0.25);
-      entity.setAngularVelocity(1.0);
-
-      // EXERCISE
-      entity.update(0.5);
-
-      // VERIFY
-      assertEqualsTolerance(entity.getRotation(), 0.25, 0.0001);
-
-      // TEARDOWN
-      entityPtr.reset();
-   }
-
-   void update_rotationWrapsNegative()
-   {
-      // SETUP
-      std::unique_ptr<EntityDouble> entityPtr(new EntityDouble);
-      EntityDouble& entity = *entityPtr;
-      entity.setRotationRadians(0.20);
-      entity.setAngularVelocity(-1.0);
-      const double expectedRotation = TWO_PI - 0.30;
-
-      // EXERCISE
-      entity.update(0.5);
-
-      // VERIFY
-      assertEqualsTolerance(entity.getRotation(), expectedRotation, 0.0001);
-
-      // TEARDOWN
-      entityPtr.reset();
-   }
-   void update_negativeTimeDelta()
-   {
-      // SETUP
-      EntityDouble entity;
-      entity.setPosition(Position(0.0, 0.0));
-      entity.setVelocity(Velocity(10.0, 20.0));
-
-      // EXERCISE
-      entity.update(-1.0);
-
-      // VERIFY - Entity should move backwards (reverse time)
-      assertEquals(entity.getPosition().getMetersX(), -10.0); // 0 + (10 * -1)
-      assertEquals(entity.getPosition().getMetersY(), -20.0); // 0 + (20 * -1)
-      assertEquals(entity.getVelocityDX(),
-                   10.0); // Velocity unchanged (no gravity at origin)
-      assertEquals(entity.getVelocityDY(), 20.0); // Velocity unchanged
-   }
-   void update_zeroTimeDelta()
-   {
-      // SETUP
-      EntityDouble entity;
-      entity.setPosition(Position(100.0, 200.0));
-      entity.setVelocity(Velocity(10.0, 20.0));
-      entity.setAngularVelocity(0.5);
-
-      // EXERCISE
-      entity.update(0.0); // Zero time - nothing should change
-
-      // VERIFY
-      assertEquals(entity.getPosition().getMetersX(), 100.0);
-      assertEquals(entity.getPosition().getMetersY(), 200.0);
-      assertEquals(entity.getVelocityDX(), 10.0);
-      assertEquals(entity.getVelocityDY(), 20.0);
-      assertEquals(entity.getRotation(), 0.0);
-   }
-};
-
-class BreakableEntityDouble : public BreakableEntity
+   /*********************************************
+ * name:    DEFAULT CONSTRUCTOR
+ * input:   nothing
+ * output:  position=(0,0), velocity=(0,0), rotation=0, angularVelocity=0
+ *********************************************/
+void construct_default()
 {
-public:
-   BreakableEntityDouble() : BreakableEntity() {}
-   BreakableEntityDouble(const Position& position, const Velocity& velocity)
-       : BreakableEntity(position, velocity)
-   {
-   }
-   double getVelocityDX() const { return getVelocity().dx; }
-   double getVelocityDY() const { return getVelocity().dy; }
-};
+   // SETUP
 
-class TestBreakableEntity : public UnitTest
+   // EXERCISE
+   EntityDouble entity;
+
+   // VERIFY
+   assertEquals(entity.position.x, 0.0);
+   assertEquals(entity.position.y, 0.0);
+   assertEquals(entity.velocity.dx, 0.0);
+   assertEquals(entity.velocity.dy, 0.0);
+   assertEquals(entity.rotation.radians, 0.0);
+   assertEquals(entity.angularVelocity, 0.0);
+
+   // TEARDOWN
+}
+
+/*********************************************
+ * name:    NON-DEFAULT CONSTRUCTOR
+ * input:   position=(10,20), velocity=(30,40), rotation=1.5, angularVelocity=-0.25
+ * output:  entity with specified values
+ *********************************************/
+void construct_nonDefault()
 {
-public:
-   void run()
-   {
-      construct_default();
-      construct_nonDefault();
-      setIsHit_true();
-      setIsHit_false();
-      report("BreakableEntity");
-   }
+   // SETUP
+   Position position;
+   position.setMetersX(10.0);
+   position.setMetersY(20.0);
+   Velocity velocity;
+   velocity.dx = 30.0;
+   velocity.dy = 40.0;
+   Angle rotation(1.5);
+   double angularVelocity = -0.25;
 
-private:
-   void construct_default()
-   {
-      // SETUP
-      std::unique_ptr<BreakableEntity> entityPtr(new BreakableEntity);
-      BreakableEntity& entity = *entityPtr;
+   // EXERCISE
+   EntityDouble entity(position, velocity, rotation, angularVelocity);
 
-      // EXERCISE
+   // VERIFY
+   assertEquals(entity.position.x, 10.0);
+   assertEquals(entity.position.y, 20.0);
+   assertEquals(entity.velocity.dx, 30.0);
+   assertEquals(entity.velocity.dy, 40.0);
+   assertEquals(entity.rotation.radians, 1.5);
+   assertEquals(entity.angularVelocity, -0.25);
 
-      // VERIFY
-      assertUnit(!entity.getIsHit());
-      assertEquals(entity.getPosition().getMetersX(), 0.0);
-      assertEquals(entity.getPosition().getMetersY(), 0.0);
+   // TEARDOWN
+}
 
-      // TEARDOWN
-      entityPtr.reset();
-   }
-
-   void construct_nonDefault()
-   {
-      // SETUP
-      Position position;
-      position.setMeters(100.0, 200.0);
-      Velocity velocity;
-      velocity.dx = 3.0;
-      velocity.dy = 4.0;
-      std::unique_ptr<BreakableEntityDouble> entityPtr(
-         new BreakableEntityDouble(position, velocity));
-      BreakableEntityDouble& entity = *entityPtr;
-
-      // EXERCISE
-
-      // VERIFY
-      assertUnit(!entity.getIsHit());
-      assertEquals(entity.getPosition().getMetersX(), 100.0);
-      assertEquals(entity.getPosition().getMetersY(), 200.0);
-      assertEquals(entity.getVelocityDX(), 3.0);
-      assertEquals(entity.getVelocityDY(), 4.0);
-
-      // TEARDOWN
-      entityPtr.reset();
-   }
-
-   void setIsHit_true()
-   {
-      // SETUP
-      std::unique_ptr<BreakableEntity> entityPtr(new BreakableEntity);
-      BreakableEntity& entity = *entityPtr;
-
-      // EXERCISE
-      entity.setIsHit();
-
-      // VERIFY
-      assertUnit(entity.getIsHit());
-
-      // TEARDOWN
-      entityPtr.reset();
-   }
-
-   void setIsHit_false()
-   {
-      // SETUP
-      std::unique_ptr<BreakableEntity> entityPtr(new BreakableEntity);
-      BreakableEntity& entity = *entityPtr;
-      entity.setIsHit();
-
-      // EXERCISE
-      entity.setIsHit(false);
-
-      // VERIFY
-      assertUnit(!entity.getIsHit());
-
-      // TEARDOWN
-      entityPtr.reset();
-   }
-};
-
-class TimedEntityDouble : public TimedEntity
+/*********************************************
+ * name:    SET POSITION UPDATES POSITION
+ * input:   position=(1234.5, -6789.0)
+ * output:  entity.position=(1234.5, -6789.0)
+ *********************************************/
+void setPosition_updatesPosition()
 {
-public:
-   TimedEntityDouble() : TimedEntity() {}
-   TimedEntityDouble(const Position& position, const Velocity& velocity,
-                     double expireTime)
-       : TimedEntity(position, velocity, expireTime)
-   {
-   }
-   double getVelocityDX() const { return getVelocity().dx; }
-   double getVelocityDY() const { return getVelocity().dy; }
-};
+   // SETUP
+   EntityDouble entity;
+   Position position;
+   position.setMeters(1234.5, -6789.0);
 
-class TestTimedEntity : public UnitTest
+   // EXERCISE
+   entity.setPosition(position);
+
+   // VERIFY
+   assertEquals(entity.position.x, 1234.5);
+   assertEquals(entity.position.y, -6789.0);
+
+   // TEARDOWN
+}
+
+/*********************************************
+ * name:    SET VELOCITY UPDATES VELOCITY
+ * input:   velocity=(-101.0, 202.0)
+ * output:  entity.velocity=(-101.0, 202.0)
+ *********************************************/
+void setVelocity_updatesVelocity()
 {
-public:
-   void run()
-   {
-      construct_default();
-      construct_nonDefault();
-      updateTimer_increasesAge();
-      update_increasesAgeAndMovesEntity();
-      report("TimedEntity");
-   }
+   // SETUP
+   EntityDouble entity;
+   Velocity velocity;
+   velocity.dx = -101.0;
+   velocity.dy = 202.0;
 
-private:
-   void construct_default()
-   {
-      // SETUP
-      std::unique_ptr<TimedEntityDouble> entityPtr(new TimedEntityDouble);
-      TimedEntityDouble& entity = *entityPtr;
+   // EXERCISE
+   entity.setVelocity(velocity);
 
-      // EXERCISE
+   // VERIFY
+   assertEquals(entity.velocity.dx, -101.0);
+   assertEquals(entity.velocity.dy, 202.0);
 
-      // VERIFY
-      assertEquals(entity.getAge(), 0.0);
-      assertEquals(entity.getExpireTime(), 0.0);
-      assertUnit(!entity.isExpired());
+   // TEARDOWN
+}
 
-      // TEARDOWN
-      entityPtr.reset();
-   }
+/*********************************************
+ * name:    SET ANGULAR VELOCITY UPDATES ANGULAR VELOCITY
+ * input:   angularVelocity=0.75
+ * output:  entity.angularVelocity=0.75
+ *********************************************/
+void setAngularVelocity_updatesAngularVelocity()
+{
+   // SETUP
+   EntityDouble entity;
 
-   void construct_nonDefault()
-   {
-      // SETUP
-      Position position;
-      position.setMeters(1.0, 2.0);
-      Velocity velocity;
-      velocity.dx = 3.0;
-      velocity.dy = 4.0;
-      std::unique_ptr<TimedEntityDouble> entityPtr(
-         new TimedEntityDouble(position, velocity, 10.0));
-      TimedEntityDouble& entity = *entityPtr;
+   // EXERCISE
+   entity.setAngularVelocity(0.75);
 
-      // EXERCISE
+   // VERIFY
+   assertEquals(entity.angularVelocity, 0.75);
 
-      // VERIFY
-      assertEquals(entity.getPosition().getMetersX(), 1.0);
-      assertEquals(entity.getPosition().getMetersY(), 2.0);
-      assertEquals(entity.getVelocityDX(), 3.0);
-      assertEquals(entity.getVelocityDY(), 4.0);
-      assertEquals(entity.getAge(), 0.0);
-      assertEquals(entity.getExpireTime(), 10.0);
+   // TEARDOWN
+}
 
-      // TEARDOWN
-      entityPtr.reset();
-   }
+/*********************************************
+ * name:    UPDATE ZERO POSITION NO GRAVITY
+ * input:   entity at origin with velocity=(10,-20), dt=2.0
+ * output:  position=(0,0) (no gravity at origin)
+ *********************************************/
+void update_zeroPositionNoGravity()
+{
+   // SETUP
+   EntityDouble entity;
+   entity.velocity.dx = 10.0;
+   entity.velocity.dy = -20.0;
 
-   void updateTimer_increasesAge()
-   {
-      // SETUP
-      std::unique_ptr<TimedEntityDouble> entityPtr(new TimedEntityDouble);
-      TimedEntityDouble& entity = *entityPtr;
-      entity.setExpireTime(10.0);
+   // EXERCISE
+   entity.update(2.0);
 
-      // EXERCISE
-      entity.updateTimer(4.0);
+   // VERIFY
+   assertEquals(entity.position.x, 0.0);
+   assertEquals(entity.position.y, 0.0);
 
-      // VERIFY
-      assertEquals(entity.getAge(), 4.0);
-      assertUnit(!entity.isExpired());
+   // TEARDOWN
+}
 
-      // TEARDOWN
-      entityPtr.reset();
-   }
+/*********************************************
+ * name:    UPDATE NON-ZERO POSITION CHANGES STATE
+ * input:   entity at position=(1000000,0), velocity=(0,100), rotation=0.5, angularVelocity=0.1, dt=1.0
+ * output:  position and rotation changed
+ *********************************************/
+void update_nonZeroPositionChangesState()
+{
+   // SETUP
+   Position position;
+   position.setMeters(1000000.0, 0.0);
+   Velocity velocity(0.0, 100.0);
+   Angle rotation(0.5);
+   EntityDouble entity(position, velocity, rotation, 0.1);
+   const double dt = 1.0;
 
-   void update_increasesAgeAndMovesEntity()
-   {
-      // SETUP
-      std::unique_ptr<TimedEntityDouble> entityPtr(new TimedEntityDouble(
-         Position(7000000.0, 0.0), Velocity(0.0, 7500.0), 2.0));
-      TimedEntityDouble& entity = *entityPtr;
+   // EXERCISE
+   entity.update(dt);
 
-      // EXERCISE
-      entity.update(1.0);
+   // VERIFY
+   // Position should have changed due to velocity
+   assertUnit(entity.position.y != 0.0);
+   // Rotation should have changed due to angular velocity
+   assertUnit(entity.rotation.radians != 0.5);
 
-      // VERIFY
-      assertEquals(entity.getAge(), 1.0);
-      assertUnit(entity.getPosition().getMetersX() < 7000000.0);
-      assertUnit(entity.getPosition().getMetersY() > 0.0);
-      assertUnit(!entity.isExpired());
+   // TEARDOWN
+}
 
-      // TEARDOWN
-      entityPtr.reset();
-   }
+/*********************************************
+ * name:    UPDATE NON-ZERO ANGULAR VELOCITY CHANGES ROTATION
+ * input:   entity with rotation=0, angularVelocity=0.5, dt=2.0
+ * output:  rotation=1.0
+ *********************************************/
+void update_nonZeroAngularVelocityChangesRotation()
+{
+   // SETUP
+   EntityDouble entity;
+   entity.setAngularVelocity(0.5);
+   const double expectedRotation = 0.5 * 2.0;
+
+   // EXERCISE
+   entity.update(2.0);
+
+   // VERIFY
+   assertEqualsTolerance(entity.rotation.radians, expectedRotation, 0.0001);
+
+   // TEARDOWN
+}
+
+/*********************************************
+ * name:    UPDATE ROTATION WRAPS POSITIVE
+ * input:   entity with rotation=2π-0.1, angularVelocity=0.2, dt=1.0
+ * output:  rotation wraps to small positive value (<1.0)
+ *********************************************/
+void update_rotationWrapsPositive()
+{
+   // SETUP
+   EntityDouble entity;
+   entity.rotation.radians = TWO_PI - 0.1;
+   entity.setAngularVelocity(0.2);
+
+   // EXERCISE
+   entity.update(1.0);
+
+   // VERIFY
+   assertUnit(entity.rotation.radians < 1.0);
+   assertUnit(entity.rotation.radians >= 0.0);
+
+   // TEARDOWN
+}
+
+/*********************************************
+ * name:    UPDATE ROTATION WRAPS NEGATIVE
+ * input:   entity with rotation=0.1, angularVelocity=-0.2, dt=1.0
+ * output:  rotation wraps to value near 2π
+ *********************************************/
+void update_rotationWrapsNegative()
+{
+   // SETUP
+   EntityDouble entity;
+   entity.rotation.radians = 0.1;
+   entity.setAngularVelocity(-0.2);
+
+   // EXERCISE
+   entity.update(1.0);
+
+   // VERIFY
+   assertUnit(entity.rotation.radians > TWO_PI - 1.0);
+   assertUnit(entity.rotation.radians < TWO_PI);
+
+   // TEARDOWN
+}
+
+/*********************************************
+ * name:    UPDATE NEGATIVE TIME DELTA
+ * input:   entity at position=(1000000,0), velocity=(0,100), dt=-1.0
+ * output:  position.y < 0 (moved backwards)
+ *********************************************/
+void update_negativeTimeDelta()
+{
+   // SETUP
+   Position position;
+   position.setMeters(1000000.0, 0.0);
+   Velocity velocity(0.0, 100.0);
+   EntityDouble entity(position, velocity, Angle(), 0.0);
+
+   // EXERCISE
+   entity.update(-1.0);
+
+   // VERIFY
+   // Position should move backwards
+   assertUnit(entity.position.y < 0.0);
+
+   // TEARDOWN
+}
+
+/*********************************************
+ * name:    UPDATE ZERO TIME DELTA
+ * input:   entity at position=(1000,2000), velocity=(100,-50), rotation=1.5, angularVelocity=0.5, dt=0.0
+ * output:  entity state unchanged
+ *********************************************/
+void update_zeroTimeDelta()
+{
+   // SETUP
+   Position position;
+   position.setMeters(1000.0, 2000.0);
+   Velocity velocity(100.0, -50.0);
+   Angle rotation(1.5);
+   EntityDouble entity(position, velocity, rotation, 0.5);
+
+   // EXERCISE
+   entity.update(0.0);
+
+   // VERIFY
+   assertEquals(entity.position.x, 1000.0);
+   assertEquals(entity.position.y, 2000.0);
+   assertEquals(entity.rotation.radians, 1.5);
+
+   // TEARDOWN
+}
 };

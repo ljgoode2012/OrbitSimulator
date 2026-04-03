@@ -13,6 +13,7 @@
 #include "uiDraw.h"
 
 class Ship;
+class TestProjectile;
 
 /*********************************************
  * Projectile
@@ -22,6 +23,8 @@ class Ship;
 class Projectile : public Entity
 {
 public:
+   friend class TestProjectile;
+   Projectile() : Entity(), ageGameUnits(0) {}
    Projectile(const Position& position, const Velocity& velocity)
        : Entity(position, velocity), ageGameUnits(0)
    {

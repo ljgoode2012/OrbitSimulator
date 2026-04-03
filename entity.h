@@ -11,14 +11,16 @@
 
 #include "acceleration.h"
 #include "angle.h"
-#include "constants.h"
-#include <cmath>
-
 #include "position.h"
 #include "velocity.h"
 class ogstream;
 class TestFragment;
 class TestProjectile;
+class TestSatellite;
+class TestShip;
+class TestEntity;
+class BreakableEntity;
+class TimedEntity;
 
 /*********************************************
  * Entity
@@ -30,6 +32,11 @@ class Entity
 public:
    friend class TestFragment;
    friend class TestProjectile;
+   friend class TestSatellite;
+   friend class TestShip;
+   friend class TestEntity;
+   friend class TestBreakableEntity;   // Add this
+   friend class TestTimedEntity;        // Add this
    // Constructors
    Entity() : position(), velocity(), rotation(0.0), angularVelocity(0.0) {}
    Entity(const Position& pos, const Velocity& vel,

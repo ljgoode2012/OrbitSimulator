@@ -11,6 +11,8 @@
 #include "acceleration.h"
 #include "angle.h"
 #include <cmath>
+class TestVelocity;
+class TestSatellite;
 
 /*********************************************
  * Velocity
@@ -20,6 +22,8 @@
 class Velocity
 {
 public:
+   friend class TestVelocity;
+   friend class TestSatellite;
    // Members
    double dx;
    double dy;

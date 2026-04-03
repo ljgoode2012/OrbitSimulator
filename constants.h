@@ -71,7 +71,7 @@ constexpr double FRAGMENT_COLLISION_RADIUS_PIXELS = 2.0;
 constexpr double SATELLITE_COLLISION_RADIUS_PIXELS = 6.0;
 constexpr double HUBBLE_COLLISION_RADIUS_PIXELS = 10.0;
 constexpr double STARLINK_COLLISION_RADIUS_PIXELS = 6.0;
-constexpr double CREW_DRAGON_COLLISION_RADIUS_PIXELS = 8.0;
+constexpr double CREW_DRAGON_COLLISION_RADIUS_PIXELS = 7.0;
 constexpr double GPS_COLLISION_RADIUS_PIXELS = 12.0;
 constexpr double SPUTNIK_COLLISION_RADIUS_PIXELS = 4.0;
 constexpr double SHIP_COLLISION_RADIUS_PIXELS = 10.0;
@@ -139,8 +139,9 @@ constexpr double MAX_SATELLITE_SPIN_RATE = 0.010;
  * Debris Constants
  *************************************************************/
 // Velocity "kick" applied to debris when created (meters/second)
-constexpr double KICK_MIN_METERS_PER_SECOND = 5000.0;
-constexpr double KICK_MAX_METERS_PER_SECOND = 9000.0;
+// Spec says 5000-9000, but reduced for better visual appearance
+constexpr double KICK_MIN_METERS_PER_SECOND = 5000;   
+constexpr double KICK_MAX_METERS_PER_SECOND = 9000;   
 
 // Fragment lifetime range (in frames)
 constexpr double FRAGMENT_MIN_LIFETIME_FRAMES = 50.0;
@@ -150,8 +151,8 @@ constexpr double FRAGMENT_MAX_LIFETIME_FRAMES = 100.0;
 constexpr double SPAWN_OFFSET_PIXELS = 4.0;
 
 // Fragment spin rate range (radians/second)
-constexpr double FRAGMENT_MIN_SPIN_RADIANS_PER_SECOND = 0.6;
-constexpr double FRAGMENT_MAX_SPIN_RADIANS_PER_SECOND = 2.0;
+constexpr double FRAGMENT_MIN_SPIN_RADIANS_PER_SECOND = 0.4;
+constexpr double FRAGMENT_MAX_SPIN_RADIANS_PER_SECOND = 1.2;
 
 /*************************************************************
  * Ship Constants

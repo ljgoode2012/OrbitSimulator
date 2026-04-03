@@ -14,6 +14,8 @@
 #include "entity.h"
 #include "uiDraw.h"
 
+class TestShip;  // Forward declaration
+
 /*********************************************
  * Ship
  * The player-controlled Dream Chaser
@@ -22,6 +24,8 @@
 class Ship : public Entity
 {
 public:
+   friend class TestShip;
+
    Ship() : Entity(), thrusting(false) {}
    Ship(const Position& position, const Velocity& velocity,
         const Angle& rotation = Angle())

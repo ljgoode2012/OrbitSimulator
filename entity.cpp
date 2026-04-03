@@ -17,9 +17,8 @@
 
 /******************************************
  * Entity : Update
- * Update the entity's position
+ * Update the entity's position, velocity, and rotation
  *****************************************/
-
 void Entity::update(double dt)
 {
    const Acceleration gravityAcceleration = computeGravityAcceleration(
@@ -29,6 +28,10 @@ void Entity::update(double dt)
    rotation.addRadians(angularVelocity * dt);
 }
 
+/******************************************
+ * Entity : Compute Gravity Acceleration
+ * Calculate the gravitational acceleration at a given position
+ *****************************************/
 Acceleration Entity::computeGravityAcceleration(const Position& position)
 {
    const double xMeters = position.getMetersX();
