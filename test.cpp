@@ -11,12 +11,12 @@
 #include "testAcceleration.h"
 #include "testAngle.h"
 #include "testEntity.h"
+#include "testFragment.h"
 #include "testPosition.h"
+#include "testProjectile.h"
 #include "testSatellite.h"
 #include "testShip.h"
 #include "testVelocity.h"
-#include "testFragment.h"
-#include "testProjectile.h"
 
 #ifdef _WIN32
 #include <cstdio>

@@ -9,9 +9,9 @@
 
 #pragma once
 
+#include "constants.h"
 #include "ship.h"
 #include "unitTest.h"
-#include "constants.h"
 
 /*********************************************
  * SHIP DOUBLE
@@ -254,7 +254,8 @@ private:
    /*********************************************
     * name:    THRUST VELOCITY CHANGE OVER ONE SECOND
     * input:   ship at rest, thrust for 30 frames (1 real second)
-    * output:  velocity change = 2,880 m/s (from time dilation, not high G-force)
+    * output:  velocity change = 2,880 m/s (from time dilation, not high
+    *G-force)
     *********************************************/
    void thrust_velocityChangeOverOneSecond()
    {
@@ -275,8 +276,6 @@ private:
       {
          ship.thrustForward(dt);
       }
-
-      
 
       // VERIFY
       const double finalSpeed = std::sqrt(ship.velocity.dx * ship.velocity.dx +

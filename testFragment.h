@@ -63,8 +63,8 @@ private:
 
    /*********************************************
     * name:    CONSTRUCT NON-DEFAULT
-    * input:   position=(1000.0, 2000.0), velocity=(500.0, -300.0), expireTime=75.0
-    * output:  fragment with specified values, age=0.0
+    * input:   position=(1000.0, 2000.0), velocity=(500.0, -300.0),
+    *expireTime=75.0 output:  fragment with specified values, age=0.0
     *********************************************/
    void construct_nonDefault()
    {
@@ -93,8 +93,8 @@ private:
 
    /*********************************************
     * name:    CONSTRUCT SETS COLLISION IMMUNITY
-    * input:   position=(1000.0, 2000.0), velocity=(100.0, 200.0), expireTime=100.0
-    * output:  collisionImmunityFrames=COLLISION_IMMUNITY_FRAMES
+    * input:   position=(1000.0, 2000.0), velocity=(100.0, 200.0),
+    *expireTime=100.0 output:  collisionImmunityFrames=COLLISION_IMMUNITY_FRAMES
     *********************************************/
    void construct_setsCollisionImmunity()
    {
@@ -327,8 +327,8 @@ private:
 
    /*********************************************
     * name:    UPDATE INCREMENTS AGE
-    * input:   fragment with age=0.0, expireTime=100.0, three updates with dt=1.0
-    * output:  age=3.0
+    * input:   fragment with age=0.0, expireTime=100.0, three updates with
+    *dt=1.0 output:  age=3.0
     *********************************************/
    void update_incrementsAge()
    {

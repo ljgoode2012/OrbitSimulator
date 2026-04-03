@@ -112,8 +112,8 @@ private:
       const double radius = std::sqrt(hubble.position.x * hubble.position.x +
                                       hubble.position.y * hubble.position.y);
       const double speed = std::sqrt(hubble.velocity.dx * hubble.velocity.dx +
-                              hubble.velocity.dy * hubble.velocity.dy);
-      
+                                     hubble.velocity.dy * hubble.velocity.dy);
+
       assertEqualsTolerance(radius, HUBBLE_ORBIT_RADIUS_METERS, 0.001);
       assertEqualsTolerance(speed,
                             3074.692, // sqrt(MU / HUBBLE_ORBIT_RADIUS_METERS)
@@ -136,13 +136,13 @@ private:
 
       // VERIFY
       double speed = std::sqrt(gps.velocity.dx * gps.velocity.dx +
-                            gps.velocity.dy * gps.velocity.dy);
-      double radius = std::sqrt(gps.position.x * gps.position.x + 
-                             gps.position.y * gps.position.y);
+                               gps.velocity.dy * gps.velocity.dy);
+      double radius = std::sqrt(gps.position.x * gps.position.x +
+                                gps.position.y * gps.position.y);
       assertEqualsTolerance(radius, GPS_ORBIT_RADIUS_METERS, 0.001);
       assertEqualsTolerance(speed,
-                         3873.4, // sqrt(MU / GPS_ORBIT_RADIUS_METERS)
-                         1.0);
+                            3873.4, // sqrt(MU / GPS_ORBIT_RADIUS_METERS)
+                            1.0);
 
       // TEARDOWN
    }
@@ -186,21 +186,20 @@ private:
       Sputnik sputnik;
 
       // VERIFY
-      assertEqualsTolerance(
-         hubble.rotation.radians,
-         earthFacingRotationRadians(hubble.position), 0.0001);
-      assertEqualsTolerance(
-         starlink.rotation.radians,
-         earthFacingRotationRadians(starlink.position), 0.0001);
-      assertEqualsTolerance(
-         crewDragon.rotation.radians,
-         earthFacingRotationRadians(crewDragon.position), 0.0001);
-      assertEqualsTolerance(
-         gps.rotation.radians,
-         earthFacingRotationRadians(gps.position), 0.0001);
-      assertEqualsTolerance(
-         sputnik.rotation.radians,
-         earthFacingRotationRadians(sputnik.position), 0.0001);
+      assertEqualsTolerance(hubble.rotation.radians,
+                            earthFacingRotationRadians(hubble.position),
+                            0.0001);
+      assertEqualsTolerance(starlink.rotation.radians,
+                            earthFacingRotationRadians(starlink.position),
+                            0.0001);
+      assertEqualsTolerance(crewDragon.rotation.radians,
+                            earthFacingRotationRadians(crewDragon.position),
+                            0.0001);
+      assertEqualsTolerance(gps.rotation.radians,
+                            earthFacingRotationRadians(gps.position), 0.0001);
+      assertEqualsTolerance(sputnik.rotation.radians,
+                            earthFacingRotationRadians(sputnik.position),
+                            0.0001);
 
       // TEARDOWN
    }
@@ -276,7 +275,7 @@ private:
       // TEARDOWN
    }
 
-    /*********************************************
+   /*********************************************
     * name:    SATELLITE UPDATE DEFUNCT USES ANGULAR VELOCITY
     * input:   defunct satellite with rotation=1.0 rad, angularVelocity=0.5
     *rad/s, dt=2.0s output:  rotation.radians=2.0 (1.0 + 0.5*2.0)
@@ -295,7 +294,8 @@ private:
       satellite.update(dt);
 
       // VERIFY
-      assertEqualsTolerance(satellite.rotation.radians, expectedRotation, 0.0001);
+      assertEqualsTolerance(satellite.rotation.radians, expectedRotation,
+                            0.0001);
 
       // TEARDOWN
    }
@@ -326,7 +326,7 @@ private:
          const double kickDY = entity->velocity.dy - parentDY;
          const double kickMagnitude = std::sqrt(kickDX * kickDX +
                                                 kickDY * kickDY);
-         
+
          // Verify kick magnitude is 5000-9000 m/s
          assertUnit(kickMagnitude >= 5000.0 - 0.1);
          assertUnit(kickMagnitude <= 9000.0 + 0.1);
@@ -347,14 +347,14 @@ private:
       Position position;
       position.x = 1000000.0;
       position.y = 0.0;
-      
+
       Velocity partVelocity;
       partVelocity.dx = 8000.0;
       partVelocity.dy = 6000.0;
       const double partDX = 8000.0;
       const double partDY = 6000.0;
-      
-      SatellitePart part(position, partVelocity, Angle(), 
+
+      SatellitePart part(position, partVelocity, Angle(),
                          SatellitePart::GPS_CENTER, 7.0, 3);
       std::vector<std::unique_ptr<Entity>> fragments;
 
@@ -371,7 +371,7 @@ private:
          const double kickDY = entity->velocity.dy - partDY;
          const double kickMagnitude = std::sqrt(kickDX * kickDX +
                                                 kickDY * kickDY);
-         
+
          // The KICK itself should be 5000-9000 m/s
          assertUnit(kickMagnitude >= 5000.0 - 0.1);
          assertUnit(kickMagnitude <= 9000.0 + 0.1);
@@ -394,22 +394,22 @@ private:
       // parentSpeed = sqrt(3000² + 4000²) = sqrt(25000000) = 5000
       const double parentSpeed = std::sqrt(parentDX * parentDX +
                                            parentDY * parentDY);
-   
+
       // EXERCISE - Manually calculate what WOULD happen with 90° kick
       const double angle90Deg = M_PI / 2.0;
       const double kickMin = 5000.0;
       const double kickMax = 9000.0;
-   
+
       const double minResultDX = parentDX + std::sin(angle90Deg) * kickMin;
       const double minResultDY = parentDY + std::cos(angle90Deg) * kickMin;
-   
+
       const double maxResultDX = parentDX + std::sin(angle90Deg) * kickMax;
       const double maxResultDY = parentDY + std::cos(angle90Deg) * kickMax;
-   
+
       // VERIFY - Confirm the math matches the requirement
       assertEqualsTolerance(minResultDX, 8000.0, 0.1);
       assertEqualsTolerance(minResultDY, 4000.0, 0.1);
-   
+
       assertEqualsTolerance(maxResultDX, 12000.0, 0.1);
       assertEqualsTolerance(maxResultDY, 4000.0, 0.1);
 

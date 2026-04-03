@@ -140,8 +140,8 @@ constexpr double MAX_SATELLITE_SPIN_RATE = 0.010;
  *************************************************************/
 // Velocity "kick" applied to debris when created (meters/second)
 // Spec says 5000-9000, but reduced for better visual appearance
-constexpr double KICK_MIN_METERS_PER_SECOND = 5000;   
-constexpr double KICK_MAX_METERS_PER_SECOND = 9000;   
+constexpr double KICK_MIN_METERS_PER_SECOND = 5000;
+constexpr double KICK_MAX_METERS_PER_SECOND = 9000;
 
 // Fragment lifetime range (in frames)
 constexpr double FRAGMENT_MIN_LIFETIME_FRAMES = 50.0;

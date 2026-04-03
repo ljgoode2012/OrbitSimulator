@@ -14,7 +14,7 @@
 #include "entity.h"
 #include "uiDraw.h"
 
-class TestShip;  // Forward declaration
+class TestShip; // Forward declaration
 
 /*********************************************
  * Ship
@@ -34,13 +34,10 @@ public:
    }
 
    void turnLeft() { turnBy(-SHIP_TURN_ANGLE_RADIANS); }
-
    void turnRight() { turnBy(SHIP_TURN_ANGLE_RADIANS); }
 
    void thrustForward(double dt) { applyThrust(1.0, dt); }
-
    void thrustReverse(double dt) { applyThrust(-1.0, dt); }
-
    void setThrusting(bool thrusting) { this->thrusting = thrusting; }
 
    void draw(ogstream& gout) const override
@@ -54,7 +51,6 @@ public:
    }
 
    double getVelocityDX() const { return getVelocity().dx; }
-
    double getVelocityDY() const { return getVelocity().dy; }
 
 private:

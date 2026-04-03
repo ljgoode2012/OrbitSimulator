@@ -199,7 +199,7 @@ private:
       a.ddx = -99.9;
       a.ddy = -88.8;
       Angle angle;
-      angle.radians = 0.0;  // UP
+      angle.radians = 0.0; // UP
       double magnitude = 3.3;
 
       // exercise

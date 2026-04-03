@@ -35,8 +35,8 @@ public:
    friend class TestSatellite;
    friend class TestShip;
    friend class TestEntity;
-   friend class TestBreakableEntity;   // Add this
-   friend class TestTimedEntity;        // Add this
+   friend class TestBreakableEntity; // Add this
+   friend class TestTimedEntity;     // Add this
    // Constructors
    Entity() : position(), velocity(), rotation(0.0), angularVelocity(0.0) {}
    Entity(const Position& pos, const Velocity& vel,
