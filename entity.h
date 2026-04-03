@@ -2,7 +2,7 @@
  * Header File:
  *    Entity : The base class for all objects in the simulation
  * Author:
- *    Lindsey Goode, Porter Williams
+ *    Lindsey Goode Porter Williams
  * Summary:
  *    Everything we need to know about a movable object in orbit
  ************************************************************************/
