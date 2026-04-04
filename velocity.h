@@ -67,31 +67,4 @@ public:
 
    // operators
    Velocity& operator=(const Velocity& v);
-   Velocity operator+(const Velocity& v) const
-   {
-      return Velocity(dx + v.dx, dy + v.dy);
-   }
-   Velocity& operator+=(const Velocity& v)
-   {
-      dx += v.dx;
-      dy += v.dy;
-      return *this;
-   }
-   Velocity operator-(const Velocity& v) const
-   {
-      return Velocity(dx - v.dx, dy - v.dy);
-   }
-   Velocity& operator-=(const Velocity& v)
-   {
-      dx -= v.dx;
-      dy -= v.dy;
-      return *this;
-   }
-   bool operator==(const Velocity& v) const { return dx == v.dx && dy == v.dy; }
-   bool operator!=(const Velocity& v) const { return !(*this == v); }
-   void update(const Acceleration& acceleration, double dt)
-   {
-      dx += acceleration.getDDX() * dt;
-      dy += acceleration.getDDY() * dt;
-   }
 };

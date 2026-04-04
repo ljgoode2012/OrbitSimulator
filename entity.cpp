@@ -23,7 +23,7 @@ void Entity::update(double dt)
 {
    const Acceleration gravityAcceleration = computeGravityAcceleration(
       position);
-   velocity.update(gravityAcceleration, dt);
+   velocity.add(gravityAcceleration, dt);
    position.update(velocity, dt);
    rotation.addRadians(angularVelocity * dt);
 }

@@ -37,7 +37,6 @@ public:
    void turnRight() { turnBy(SHIP_TURN_ANGLE_RADIANS); }
 
    void thrustForward(double dt) { applyThrust(1.0, dt); }
-   void thrustReverse(double dt) { applyThrust(-1.0, dt); }
    void setThrusting(bool thrusting) { this->thrusting = thrusting; }
 
    void draw(ogstream& gout) const override

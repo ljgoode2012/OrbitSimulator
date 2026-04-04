@@ -15,7 +15,6 @@
 #include "constants.h"
 #include "timedEntity.h"
 
-class testFragment;
 class TestSatellite;
 /*********************************************
  * Fragment

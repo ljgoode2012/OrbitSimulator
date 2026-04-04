@@ -52,8 +52,6 @@ public:
 
    void setDegrees(double degrees) { setRadians(degrees * M_PI / 180.0); }
 
-   void setNaturalRadians(double radians) { this->radians = radians; }
-
    void setUp() { radians = 0.0; }
 
    void setDown() { radians = M_PI; }

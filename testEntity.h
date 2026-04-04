@@ -61,8 +61,6 @@ public:
    }
 
 private:
-   static constexpr double TWO_PI = 2.0 * M_PI;
-
    /*********************************************
     * name:    DEFAULT CONSTRUCTOR
     * input:   nothing

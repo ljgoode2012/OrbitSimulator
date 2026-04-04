@@ -46,8 +46,6 @@ public:
    }
 
 private:
-   static constexpr double HALF_PI = 1.57079632679489661923;
-   static constexpr double TWO_PI = 6.28318530717958647692;
    static constexpr double EARTH_GRAVITY_M_S_SQ = 9.8;
    static constexpr double TOLERANCE = 0.001;
 
@@ -145,7 +143,7 @@ private:
    {
       // SETUP
       Ship ship;
-      ship.rotation.radians = HALF_PI;
+      ship.rotation.radians = M_PI_2;
       const double dt = 48.0;
       const double expectedDeltaV =
          SHIP_THRUST_ACCELERATION_METERS_PER_SECOND_SQUARED * dt;

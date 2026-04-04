@@ -18,8 +18,6 @@ class TestPosition;
 class TestFragment;
 class TestProjectile;
 class TestEntity;
-class TestBreakableEntity;
-class TestTimedEntity;
 class TestSatellite;
 class TestShip;
 
@@ -34,8 +32,6 @@ public:
    friend class TestFragment;
    friend class TestProjectile;
    friend class TestEntity;
-   friend class TestBreakableEntity;
-   friend class TestTimedEntity;
    friend class TestSatellite;
    friend class TestShip;
 

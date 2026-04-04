@@ -22,7 +22,6 @@ class TimedEntity : public Entity
 {
 public:
    friend class TestFragment;
-   friend class TestTimedEntity;
    friend class TestProjectile;
 
    // Constructors
