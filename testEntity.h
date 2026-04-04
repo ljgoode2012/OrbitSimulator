@@ -184,7 +184,7 @@ private:
    /*********************************************
     * name:    UPDATE ZERO POSITION NO GRAVITY
     * input:   entity at origin with velocity=(10,-20), dt=2.0
-    * output:  position=(0,0) (no gravity at origin)
+    * output:  position=(20,-40) (velocity applied, no gravity at origin)
     *********************************************/
    void update_zeroPositionNoGravity()
    {
@@ -197,8 +197,8 @@ private:
       entity.update(2.0);
 
       // VERIFY
-      assertEquals(entity.position.x, 0.0);
-      assertEquals(entity.position.y, 0.0);
+      assertEquals(entity.position.x, 20.0);
+      assertEquals(entity.position.y, -40.0);
 
       // TEARDOWN
    }

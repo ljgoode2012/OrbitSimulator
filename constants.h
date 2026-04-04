@@ -11,11 +11,19 @@
 #define M_PI_2 (M_PI / 2.0)
 #endif
 
+constexpr double TWO_PI = M_PI * 2.0;
+
 /*************************************************************
  * Physics Constants
  *************************************************************/
 // Earth's gravitational parameter (G * M) in m^3/s^2
 constexpr double MU = 3.986004418e14;
+
+// Length of one sidereal day (seconds)
+constexpr double SIDEREAL_DAY_SECONDS = 86164.0905;
+
+// Earth's rotation rate (radians/second)
+constexpr double EARTH_ROTATION_RATE = TWO_PI / SIDEREAL_DAY_SECONDS;
 
 /*************************************************************
  * Simulation Constants
@@ -32,6 +40,9 @@ constexpr double SIM_SECONDS_PER_FRAME = 86400.0 / FRAMES_PER_SIM_DAY; // 48.0
 // Number of stars to generate
 constexpr int NUM_STARS = 200;
 
+// Number of GPS satellites to spawn
+constexpr int GPS_SATELLITE_COUNT = 10;
+
 /*************************************************************
  * Orbital Constants - Satellite Orbits
  *************************************************************/
@@ -39,7 +50,7 @@ constexpr int NUM_STARS = 200;
 constexpr double GEO_RADIUS_METERS = 42164000.0;
 
 // Hubble orbit radius (same as GEO)
-constexpr double HUBBLE_ORBIT_RADIUS_METERS = 42164000.0;
+constexpr double HUBBLE_ORBIT_RADIUS_METERS = GEO_RADIUS_METERS;
 
 // Starlink orbit radius (~13,020 km)
 constexpr double STARLINK_ORBIT_RADIUS_METERS = 13020000.0;
@@ -56,11 +67,9 @@ constexpr double SPUTNIK_ORBIT_RADIUS_METERS = 50000000.0;
 /*************************************************************
  * Default Phase Angles (Starting Positions)
  *************************************************************/
-constexpr double HUBBLE_DEFAULT_PHASE_RADIANS = -1.57079632679489661923; // -π/2
-constexpr double STARLINK_DEFAULT_PHASE_RADIANS =
-   -1.57079632679489661923; // -π/2
-constexpr double CREW_DRAGON_DEFAULT_PHASE_RADIANS =
-   1.57079632679489661923; // π/2
+constexpr double HUBBLE_DEFAULT_PHASE_RADIANS = -M_PI_2;     // -π/2
+constexpr double STARLINK_DEFAULT_PHASE_RADIANS = -M_PI_2;   // -π/2
+constexpr double CREW_DRAGON_DEFAULT_PHASE_RADIANS = M_PI_2; // π/2
 constexpr double GPS_DEFAULT_PHASE_RADIANS = 0.0;
 constexpr double SPUTNIK_DEFAULT_PHASE_RADIANS = 5.340707511102648;
 
@@ -76,6 +85,7 @@ constexpr double GPS_COLLISION_RADIUS_PIXELS = 12.0;
 constexpr double SPUTNIK_COLLISION_RADIUS_PIXELS = 4.0;
 constexpr double SHIP_COLLISION_RADIUS_PIXELS = 10.0;
 constexpr double PROJECTILE_COLLISION_RADIUS_PIXELS = 1.0;
+constexpr double EARTH_COLLISION_RADIUS_PIXELS = 50.0;
 
 /*************************************************************
  * Satellite Part Collision Radii (in pixels)

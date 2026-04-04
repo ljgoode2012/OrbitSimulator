@@ -39,7 +39,10 @@ public:
    // getters
    double getExpireTime() const { return expireTime; }
    double getAge() const { return age; }
-   bool isExpired() const { return expireTime > 0.0 && age >= expireTime; }
+   bool isExpired() const override
+   {
+      return expireTime > 0.0 && age >= expireTime;
+   }
 
    void updateTimer(double dt) { age += dt; }
 

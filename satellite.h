@@ -37,7 +37,10 @@ public:
    void draw(ogstream& gout) const override;
    void update(double dt) override;
    void setInitialRotation(const Angle& rotation) { setRotation(rotation); }
-   bool isCollisionImmune() const { return collisionImmunityFrames > 0; }
+   bool isCollisionImmune() const override
+   {
+      return collisionImmunityFrames > 0;
+   }
    double getCollisionRadiusPixels() const override
    {
       return FRAGMENT_COLLISION_RADIUS_PIXELS;
@@ -84,7 +87,10 @@ public:
    void update(double dt) override;
    double getCollisionRadiusPixels() const override { return radiusPixels; }
    int getFragmentsOnBreak() const { return fragmentsOnBreak; }
-   bool isCollisionImmune() const { return collisionImmunityFrames > 0; }
+   bool isCollisionImmune() const override
+   {
+      return collisionImmunityFrames > 0;
+   }
    void createBreakupDebris(
       std::vector<std::unique_ptr<Entity>>& debris) const override;
 

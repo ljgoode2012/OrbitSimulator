@@ -47,3 +47,23 @@ Acceleration Entity::computeGravityAcceleration(const Position& position)
    const double accelerationY = (-MU * yMeters) / radiusCubed;
    return Acceleration(accelerationX, accelerationY);
 }
+
+/******************************************
+ * areColliding
+ * Check whether two entities overlap within their combined collision radii
+ *****************************************/
+bool areColliding(const Entity& lhs, const Entity& rhs)
+{
+   if (lhs.isCollisionImmune() || rhs.isCollisionImmune())
+      return false;
+   const double lhsRadiusPixels = lhs.getCollisionRadiusPixels();
+   const double rhsRadiusPixels = rhs.getCollisionRadiusPixels();
+   if (lhsRadiusPixels <= 0.0 || rhsRadiusPixels <= 0.0)
+      return false;
+
+   const double collisionRadiusMeters = (lhsRadiusPixels + rhsRadiusPixels) *
+                                        lhs.getPosition().getZoom();
+   const double distanceMeters = computeDistance(lhs.getPosition(),
+                                                 rhs.getPosition());
+   return distanceMeters <= collisionRadiusMeters;
+}

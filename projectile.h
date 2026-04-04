@@ -48,7 +48,7 @@ public:
       return PROJECTILE_COLLISION_RADIUS_PIXELS;
    }
 
-   bool isExpired() const
+   bool isExpired() const override
    {
       return ageGameUnits >= PROJECTILE_LIFETIME_GAME_UNITS;
    }

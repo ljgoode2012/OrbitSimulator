@@ -2,7 +2,7 @@
  * Header File:
  *    Entity : The base class for all objects in the simulation
  * Author:
- *    Lindsey Goode Porter Williams
+ *    Lindsey Goode, Porter Williams
  * Summary:
  *    Everything we need to know about a movable object in orbit
  ************************************************************************/
@@ -68,6 +68,8 @@ public:
    virtual void draw(ogstream& gout) const { (void)gout; }
 
    virtual double getCollisionRadiusPixels() const { return 0.0; }
+   virtual bool isCollisionImmune() const { return false; }
+   virtual bool isExpired() const { return false; }
 
 protected:
    Position& getPositionMutable() { return position; }
@@ -81,3 +83,5 @@ private:
    Angle rotation;
    double angularVelocity;
 };
+
+bool areColliding(const Entity& lhs, const Entity& rhs);

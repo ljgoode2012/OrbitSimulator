@@ -158,6 +158,7 @@
     <ClInclude Include="angle.h" />
     <ClInclude Include="breakableEntity.h" />
     <ClInclude Include="constants.h" />
+    <ClInclude Include="earth.h" />
     <ClInclude Include="entity.h" />
     <ClInclude Include="position.h" />
     <ClInclude Include="projectile.h" />

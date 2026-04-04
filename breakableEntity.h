@@ -44,6 +44,11 @@ public:
       (void)debris;
    }
 
+   void breakInto(std::vector<std::unique_ptr<Entity>>& debris) const
+   {
+      createBreakupDebris(debris);
+   }
+
 private:
    bool isHit;
 };
